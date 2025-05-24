@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 const Index = () => {
   const [config, setConfig] = useState<ConversationConfig>({
     language: 'fi',
-    webhookUrl: 'https://n8n.artbachmann.eu/webhook-test/voice-assistant'
+    webhookUrl: 'https://n8n.artbachmann.eu/webhook/voice-assistant'
   });
 
   const conversation = useConversation(config);
