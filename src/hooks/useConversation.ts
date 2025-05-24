@@ -42,7 +42,6 @@ export const useConversation = (config: ConversationConfig) => {
 
   const stopRecordingAndSend = useCallback(async () => {
     try {
-      state.clearRecordingTimeout();
       state.setVoiceState(prev => ({ ...prev, status: 'sending', isRecording: false }));
       state.setIsWaitingForClick(false);
       addSystemMessage('Pysäytän nauhoituksen...');
@@ -134,17 +133,12 @@ export const useConversation = (config: ConversationConfig) => {
       await microphone.startRecording();
       addSystemMessage('Kuuntelen... Kliki uuesti kui oled valmis!');
 
-      // Set a maximum recording time of 30 seconds as safety
-      state.setRecordingTimeout(async () => {
-        addSystemMessage('Maksimum aeg saavutatud, salvestan...');
-        await stopRecordingAndSend();
-      }, 30000);
+      // No automatic timeout - user controls when to send
 
     } catch (error) {
       console.error('Voice interaction error:', error);
       
       microphone.cleanup();
-      state.clearRecordingTimeout();
       
       state.setVoiceState({
         status: 'idle',
