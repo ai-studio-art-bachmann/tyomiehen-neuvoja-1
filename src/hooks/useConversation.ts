@@ -6,6 +6,12 @@ import { useAudioPlayer } from './useAudioPlayer';
 import { toast } from '@/hooks/use-toast';
 
 export const useConversation = (config: ConversationConfig) => {
+  // Fix hooks order - all useRef hooks first
+  const messageIdCounter = useRef(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const recordingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Then all useState hooks
   const [voiceState, setVoiceState] = useState<VoiceState>({
     status: 'idle',
     isRecording: false,
@@ -15,11 +21,10 @@ export const useConversation = (config: ConversationConfig) => {
   
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isFirstInteraction, setIsFirstInteraction] = useState(true);
-  const messageIdCounter = useRef(0);
+  const [isWaitingForClick, setIsWaitingForClick] = useState(false);
   
   const microphone = useMicrophone();
   const audioPlayer = useAudioPlayer();
-  const abortControllerRef = useRef<AbortController | null>(null);
 
   const addMessage = useCallback((message: Omit<ChatMessage, 'id' | 'timestamp'>) => {
     messageIdCounter.current += 1;
@@ -72,7 +77,6 @@ export const useConversation = (config: ConversationConfig) => {
         throw new Error(`Palvelin vastasi virheellä: ${response.status} ${response.statusText}`);
       }
 
-      // Check if response is audio (mp3)
       const contentType = response.headers.get('content-type');
       console.log('Response content type:', contentType);
       
@@ -82,7 +86,6 @@ export const useConversation = (config: ConversationConfig) => {
         console.log('Received audio response, created URL:', audioUrl);
         return audioUrl;
       } else {
-        // Fallback to JSON response
         const data = await response.json();
         console.log('Received JSON response:', data);
         return data.answer || data.response || 'Vastausta ei saatu.';
@@ -93,7 +96,6 @@ export const useConversation = (config: ConversationConfig) => {
       }
       console.error('Webhook error:', error);
       
-      // More specific error messages
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
         throw new Error('Verkkoyhteydessä on ongelma. Tarkista internetyhteys.');
       }
@@ -102,36 +104,15 @@ export const useConversation = (config: ConversationConfig) => {
     }
   }, [config.webhookUrl]);
 
-  const handleVoiceInteraction = useCallback(async () => {
+  const stopRecordingAndSend = useCallback(async () => {
     try {
-      // First interaction: try to play greeting, but continue even if it fails
-      if (isFirstInteraction) {
-        setVoiceState(prev => ({ ...prev, status: 'greeting' }));
-        addSystemMessage('Aloitan keskustelun...');
-        
-        try {
-          await audioPlayer.playGreeting();
-          addSystemMessage('Tervehdys toistettu!');
-        } catch (error) {
-          console.warn('Greeting audio failed, continuing without it:', error);
-          addSystemMessage('Valmis kuuntelemaan!');
-        }
-        
-        setIsFirstInteraction(false);
+      if (recordingTimeoutRef.current) {
+        clearTimeout(recordingTimeoutRef.current);
+        recordingTimeoutRef.current = null;
       }
 
-      // Start recording
-      setVoiceState(prev => ({ ...prev, status: 'recording', isRecording: true }));
-      addSystemMessage('Alusta puhuminen...');
-      
-      await microphone.startRecording();
-      addSystemMessage('Kuuntelen... (puhu 5 sekunnin ajan)');
-
-      // Record for 5 seconds instead of 3
-      await new Promise(resolve => setTimeout(resolve, 5000));
-
-      // Stop recording
       setVoiceState(prev => ({ ...prev, status: 'sending', isRecording: false }));
+      setIsWaitingForClick(false);
       addSystemMessage('Pysäytän nauhoituksen...');
       
       const audioBlob = await microphone.stopRecording();
@@ -142,24 +123,20 @@ export const useConversation = (config: ConversationConfig) => {
       
       console.log('Audio recorded successfully, size:', audioBlob.size);
       
-      // Add user message
       addMessage({
         type: 'user',
         content: 'Ääniviestin sisältö käsitellään...'
       });
 
-      // Send to webhook
       setVoiceState(prev => ({ ...prev, status: 'waiting' }));
       addSystemMessage('Lähetän palvelimelle...');
 
       const responseData = await sendAudioToWebhook(audioBlob);
 
-      // Handle response
       setVoiceState(prev => ({ ...prev, status: 'playing', isPlaying: true }));
       addSystemMessage('Toistan vastauksen...');
 
       if (responseData.startsWith('blob:')) {
-        // Audio response
         addMessage({
           type: 'assistant',
           content: 'Äänivastaus',
@@ -168,14 +145,12 @@ export const useConversation = (config: ConversationConfig) => {
 
         await audioPlayer.playAudio(responseData);
       } else {
-        // Text response
         addMessage({
           type: 'assistant',
           content: responseData
         });
       }
 
-      // Return to idle
       setVoiceState({
         status: 'idle',
         isRecording: false,
@@ -187,7 +162,6 @@ export const useConversation = (config: ConversationConfig) => {
     } catch (error) {
       console.error('Voice interaction error:', error);
       
-      // Cleanup microphone if it's still recording
       microphone.cleanup();
       
       setVoiceState({
@@ -205,13 +179,82 @@ export const useConversation = (config: ConversationConfig) => {
 
       addSystemMessage(`Virhe: ${error instanceof Error ? error.message : 'Tuntematon virhe'}`);
     }
-  }, [isFirstInteraction, microphone, audioPlayer, sendAudioToWebhook, addMessage, addSystemMessage]);
+  }, [microphone, audioPlayer, sendAudioToWebhook, addMessage, addSystemMessage]);
+
+  const handleVoiceInteraction = useCallback(async () => {
+    try {
+      // If waiting for click to stop recording
+      if (isWaitingForClick) {
+        await stopRecordingAndSend();
+        return;
+      }
+
+      // First interaction: try to play greeting
+      if (isFirstInteraction) {
+        setVoiceState(prev => ({ ...prev, status: 'greeting' }));
+        addSystemMessage('Aloitan keskustelun...');
+        
+        try {
+          await audioPlayer.playGreeting();
+          addSystemMessage('Tervehdys toistettu!');
+        } catch (error) {
+          console.warn('Greeting audio failed, continuing without it:', error);
+          addSystemMessage('Valmis kuuntelemaan!');
+        }
+        
+        setIsFirstInteraction(false);
+      }
+
+      // Start recording
+      setVoiceState(prev => ({ ...prev, status: 'recording', isRecording: true }));
+      setIsWaitingForClick(true);
+      addSystemMessage('Alusta puhuminen...');
+      
+      await microphone.startRecording();
+      addSystemMessage('Kuuntelen... Kliki uuesti kui oled valmis!');
+
+      // Set a maximum recording time of 30 seconds as safety
+      recordingTimeoutRef.current = setTimeout(async () => {
+        addSystemMessage('Maksimum aeg saavutatud, salvestan...');
+        await stopRecordingAndSend();
+      }, 30000);
+
+    } catch (error) {
+      console.error('Voice interaction error:', error);
+      
+      microphone.cleanup();
+      if (recordingTimeoutRef.current) {
+        clearTimeout(recordingTimeoutRef.current);
+        recordingTimeoutRef.current = null;
+      }
+      
+      setVoiceState({
+        status: 'idle',
+        isRecording: false,
+        isPlaying: false,
+        error: error instanceof Error ? error.message : 'Tuntematon virhe'
+      });
+      setIsWaitingForClick(false);
+
+      toast({
+        title: "Virhe äänikäskyssä",
+        description: error instanceof Error ? error.message : "Yritä uudelleen",
+        variant: "destructive"
+      });
+
+      addSystemMessage(`Virhe: ${error instanceof Error ? error.message : 'Tuntematon virhe'}`);
+    }
+  }, [isFirstInteraction, isWaitingForClick, microphone, audioPlayer, stopRecordingAndSend, addMessage, addSystemMessage]);
 
   const reset = useCallback(() => {
     microphone.cleanup();
     audioPlayer.stopAudio();
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
+    }
+    if (recordingTimeoutRef.current) {
+      clearTimeout(recordingTimeoutRef.current);
+      recordingTimeoutRef.current = null;
     }
     setVoiceState({
       status: 'idle',
@@ -221,6 +264,7 @@ export const useConversation = (config: ConversationConfig) => {
     });
     setMessages([]);
     setIsFirstInteraction(true);
+    setIsWaitingForClick(false);
     messageIdCounter.current = 0;
   }, [microphone, audioPlayer]);
 
@@ -229,6 +273,7 @@ export const useConversation = (config: ConversationConfig) => {
     messages,
     handleVoiceInteraction,
     reset,
-    isDisabled: voiceState.status !== 'idle'
+    isDisabled: voiceState.status !== 'idle' && !isWaitingForClick,
+    isWaitingForClick
   };
 };

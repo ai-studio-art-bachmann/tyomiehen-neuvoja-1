@@ -9,9 +9,18 @@ interface VoiceButtonProps {
   voiceState: VoiceState;
   onPress: () => void;
   disabled?: boolean;
+  isWaitingForClick?: boolean;
 }
 
-const getButtonState = (status: VoiceState['status']) => {
+const getButtonState = (status: VoiceState['status'], isWaitingForClick: boolean = false) => {
+  if (isWaitingForClick) {
+    return {
+      text: 'Kliki kui oled valmis!',
+      color: 'bg-orange-500 hover:bg-orange-600',
+      pulse: true
+    };
+  }
+
   switch (status) {
     case 'idle':
       return {
@@ -61,10 +70,11 @@ const getButtonState = (status: VoiceState['status']) => {
 export const VoiceButton: React.FC<VoiceButtonProps> = ({
   voiceState,
   onPress,
-  disabled = false
+  disabled = false,
+  isWaitingForClick = false
 }) => {
-  const buttonState = getButtonState(voiceState.status);
-  const isDisabled = disabled || voiceState.status !== 'idle';
+  const buttonState = getButtonState(voiceState.status, isWaitingForClick);
+  const isDisabled = disabled || (voiceState.status !== 'idle' && !isWaitingForClick);
 
   return (
     <div className="flex flex-col items-center space-y-4">

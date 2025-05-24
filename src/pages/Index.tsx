@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { VoiceButton } from '@/components/VoiceButton';
 import { DynamicResponsePanel } from '@/components/DynamicResponsePanel';
@@ -17,7 +16,7 @@ const Index = () => {
 
   const handleLanguageChange = (language: ConversationConfig['language']) => {
     setConfig(prev => ({ ...prev, language }));
-    conversation.reset(); // Reset conversation when language changes
+    conversation.reset();
   };
 
   const handleReset = () => {
@@ -60,6 +59,7 @@ const Index = () => {
               voiceState={conversation.voiceState}
               onPress={conversation.handleVoiceInteraction}
               disabled={conversation.isDisabled}
+              isWaitingForClick={conversation.isWaitingForClick}
             />
             
             {conversation.messages.length > 0 && (
