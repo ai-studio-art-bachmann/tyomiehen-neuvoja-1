@@ -44,6 +44,9 @@ export const useConversation = (config: ConversationConfig) => {
 
   const stopRecordingAndSend = useCallback(async () => {
     try {
+      // Stop any playing audio before processing new request
+      audioPlayer.stopAudio();
+      
       state.setVoiceState(prev => ({ ...prev, status: 'sending', isRecording: false }));
       state.setIsWaitingForClick(false);
       addSystemMessage(t.stopRecording);
@@ -121,6 +124,9 @@ export const useConversation = (config: ConversationConfig) => {
 
   const handleVoiceInteraction = useCallback(async () => {
     try {
+      // Stop any playing audio before starting new interaction
+      audioPlayer.stopAudio();
+      
       // If waiting for click to stop recording
       if (state.isWaitingForClick) {
         await stopRecordingAndSend();

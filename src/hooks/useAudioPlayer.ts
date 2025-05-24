@@ -6,13 +6,22 @@ export const useAudioPlayer = () => {
   const [currentAudio, setCurrentAudio] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  const stopAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      // Force garbage collection by removing src
+      audioRef.current.src = '';
+      audioRef.current.load();
+    }
+    setIsPlaying(false);
+    setCurrentAudio(null);
+  }, []);
+
   const playAudio = useCallback(async (audioUrl: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-      // Stop any currently playing audio
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
+      // Always stop any currently playing audio first
+      stopAudio();
 
       const audio = new Audio(audioUrl);
       audioRef.current = audio;
@@ -52,7 +61,7 @@ export const useAudioPlayer = () => {
       // Preload the audio
       audio.load();
     });
-  }, []);
+  }, [stopAudio]);
 
   const playGreeting = useCallback(async (): Promise<void> => {
     try {
@@ -63,15 +72,6 @@ export const useAudioPlayer = () => {
       throw new Error('Tervehdysääni ei ole saatavilla');
     }
   }, [playAudio]);
-
-  const stopAudio = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-    setIsPlaying(false);
-    setCurrentAudio(null);
-  }, []);
 
   return {
     isPlaying,
