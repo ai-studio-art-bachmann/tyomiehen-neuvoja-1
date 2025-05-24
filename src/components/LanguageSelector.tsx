@@ -19,7 +19,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   onLanguageChange
 }) => {
   return (
-    <div className="flex space-x-2 p-2">
+    <div className="flex justify-center space-x-2 p-2">
       {languages.map((lang) => (
         <Button
           key={lang.code}
@@ -35,3 +35,4 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
     </div>
   );
 };
+
