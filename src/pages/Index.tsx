@@ -29,21 +29,23 @@ const Index = () => {
       {/* Top spacer for mobile optimization */}
       <div className="pt-16" />
 
-      {/* Header - moved 60px lower and made same width */}
-      <header className="bg-white/95 backdrop-blur-sm shadow-lg border-b border-orange-100 rounded-b-3xl mx-2">
-        <div className="max-w-sm mx-auto px-6 py-6">
-          <h1 className="text-3xl font-bold text-center text-orange-600 mb-2">
-            Työmiehen paras kaveri!
-          </h1>
-          <p className="text-sm text-gray-600 text-center leading-relaxed">
-            Ääniohjattu työkalu rakennustyömaalle
-          </p>
-        </div>
-      </header>
+      {/* Header - narrow width like other sections */}
+      <div className="max-w-sm mx-auto w-full px-2">
+        <header className="bg-white/95 backdrop-blur-sm shadow-lg border-b border-orange-100 rounded-b-3xl">
+          <div className="px-6 py-6">
+            <h1 className="text-3xl font-bold text-center text-orange-600 mb-2">
+              Työmiehen paras kaveri!
+            </h1>
+            <p className="text-sm text-gray-600 text-center leading-relaxed">
+              Ääniohjattu työkalu rakennustyömaalle
+            </p>
+          </div>
+        </header>
+      </div>
 
-      {/* Language Selector - same width as other sections */}
-      <div className="bg-white/90 backdrop-blur-sm border-b border-gray-200 mx-2 mt-2 rounded-xl">
-        <div className="max-w-sm mx-auto">
+      {/* Language Selector - narrow width */}
+      <div className="max-w-sm mx-auto w-full px-2">
+        <div className="bg-white/90 backdrop-blur-sm border-b border-gray-200 mt-2 rounded-xl">
           <LanguageSelector
             currentLanguage={config.language}
             onLanguageChange={handleLanguageChange}
@@ -51,7 +53,7 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Main Content - all sections now have consistent width */}
+      {/* Main Content - all sections now have consistent narrow width */}
       <div className="flex-1 max-w-sm mx-auto w-full flex flex-col px-2 mt-4">
         {/* Chat Panel */}
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 flex-1 overflow-hidden">
@@ -84,14 +86,14 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Footer - same width consistency */}
-      <footer className="bg-white/80 backdrop-blur-sm border-t border-gray-200 py-3 mx-2 rounded-t-xl">
-        <div className="max-w-sm mx-auto">
+      {/* Footer - narrow width */}
+      <div className="max-w-sm mx-auto w-full px-2">
+        <footer className="bg-white/80 backdrop-blur-sm border-t border-gray-200 py-3 rounded-t-xl">
           <p className="text-xs text-gray-500 text-center font-medium">
             Powered by Työkalu App v1.0
           </p>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 };
