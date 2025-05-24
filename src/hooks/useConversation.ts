@@ -15,15 +15,17 @@ export const useConversation = (config: ConversationConfig) => {
   
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isFirstInteraction, setIsFirstInteraction] = useState(true);
+  const messageIdCounter = useRef(0);
   
   const microphone = useMicrophone();
   const audioPlayer = useAudioPlayer();
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const addMessage = useCallback((message: Omit<ChatMessage, 'id' | 'timestamp'>) => {
+    messageIdCounter.current += 1;
     const newMessage: ChatMessage = {
       ...message,
-      id: Date.now().toString(),
+      id: `msg-${messageIdCounter.current}-${Date.now()}`,
       timestamp: new Date()
     };
     setMessages(prev => [...prev, newMessage]);
@@ -47,35 +49,55 @@ export const useConversation = (config: ConversationConfig) => {
     abortControllerRef.current = controller;
 
     try {
+      console.log('Sending audio to webhook:', config.webhookUrl);
+      console.log('Audio blob size:', audioBlob.size, 'bytes');
+
       const formData = new FormData();
       formData.append('data0', audioBlob, 'speech.webm');
 
       const response = await fetch(config.webhookUrl, {
         method: 'POST',
         body: formData,
-        signal: controller.signal
+        signal: controller.signal,
+        mode: 'cors',
+        headers: {
+          'Accept': 'audio/mpeg,application/json,*/*'
+        }
       });
 
+      console.log('Webhook response status:', response.status);
+      console.log('Webhook response headers:', response.headers);
+
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(`Palvelin vastasi virheellä: ${response.status} ${response.statusText}`);
       }
 
       // Check if response is audio (mp3)
       const contentType = response.headers.get('content-type');
+      console.log('Response content type:', contentType);
+      
       if (contentType && contentType.includes('audio')) {
         const audioBlob = await response.blob();
         const audioUrl = URL.createObjectURL(audioBlob);
+        console.log('Received audio response, created URL:', audioUrl);
         return audioUrl;
       } else {
         // Fallback to JSON response
         const data = await response.json();
-        return data.answer || 'Vastausta ei saatu.';
+        console.log('Received JSON response:', data);
+        return data.answer || data.response || 'Vastausta ei saatu.';
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
         throw new Error('Pyyntö keskeytetty');
       }
       console.error('Webhook error:', error);
+      
+      // More specific error messages
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        throw new Error('Verkkoyhteydessä on ongelma. Tarkista internetyhteys.');
+      }
+      
       throw new Error('Palvelinyhteys epäonnistui');
     }
   }, [config.webhookUrl]);
@@ -103,17 +125,22 @@ export const useConversation = (config: ConversationConfig) => {
       addSystemMessage('Alusta puhuminen...');
       
       await microphone.startRecording();
-      addSystemMessage('Kuuntelen...');
+      addSystemMessage('Kuuntelen... (puhu 5 sekunnin ajan)');
 
-      // Wait for user to finish speaking (you might want to implement voice activity detection)
-      // For now, we'll record for a fixed duration or until manually stopped
-      await new Promise(resolve => setTimeout(resolve, 3000)); // 3 seconds for demo
+      // Record for 5 seconds instead of 3
+      await new Promise(resolve => setTimeout(resolve, 5000));
 
       // Stop recording
-      setVoiceState(prev => ({ ...prev, status: 'sending' }));
-      addSystemMessage('Lähetän...');
+      setVoiceState(prev => ({ ...prev, status: 'sending', isRecording: false }));
+      addSystemMessage('Pysäytän nauhoituksen...');
       
       const audioBlob = await microphone.stopRecording();
+      
+      if (audioBlob.size === 0) {
+        throw new Error('Äänitallennus epäonnistui - ei ääntä havaittu');
+      }
+      
+      console.log('Audio recorded successfully, size:', audioBlob.size);
       
       // Add user message
       addMessage({
@@ -123,7 +150,7 @@ export const useConversation = (config: ConversationConfig) => {
 
       // Send to webhook
       setVoiceState(prev => ({ ...prev, status: 'waiting' }));
-      addSystemMessage('Odotan vastausta...');
+      addSystemMessage('Lähetän palvelimelle...');
 
       const responseData = await sendAudioToWebhook(audioBlob);
 
@@ -133,7 +160,7 @@ export const useConversation = (config: ConversationConfig) => {
 
       if (responseData.startsWith('blob:')) {
         // Audio response
-        const assistantMessage = addMessage({
+        addMessage({
           type: 'assistant',
           content: 'Äänivastaus',
           audioUrl: responseData
@@ -194,6 +221,7 @@ export const useConversation = (config: ConversationConfig) => {
     });
     setMessages([]);
     setIsFirstInteraction(true);
+    messageIdCounter.current = 0;
   }, [microphone, audioPlayer]);
 
   return {
