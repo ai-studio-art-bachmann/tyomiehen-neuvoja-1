@@ -82,14 +82,20 @@ export const useConversation = (config: ConversationConfig) => {
 
   const handleVoiceInteraction = useCallback(async () => {
     try {
-      // First interaction: play greeting
+      // First interaction: try to play greeting, but continue even if it fails
       if (isFirstInteraction) {
         setVoiceState(prev => ({ ...prev, status: 'greeting' }));
-        addSystemMessage('Tervehdin sinua...');
+        addSystemMessage('Aloitan keskustelun...');
         
-        await audioPlayer.playGreeting();
+        try {
+          await audioPlayer.playGreeting();
+          addSystemMessage('Tervehdys toistettu!');
+        } catch (error) {
+          console.warn('Greeting audio failed, continuing without it:', error);
+          addSystemMessage('Valmis kuuntelemaan!');
+        }
+        
         setIsFirstInteraction(false);
-        addSystemMessage('Valmis kuuntelemaan!');
       }
 
       // Start recording
@@ -153,6 +159,9 @@ export const useConversation = (config: ConversationConfig) => {
 
     } catch (error) {
       console.error('Voice interaction error:', error);
+      
+      // Cleanup microphone if it's still recording
+      microphone.cleanup();
       
       setVoiceState({
         status: 'idle',

@@ -29,12 +29,25 @@ export const useAudioPlayer = () => {
         setIsPlaying(false);
         setCurrentAudio(null);
         console.error('Audio playback error:', error);
-        reject(error);
+        reject(new Error('Audio toisaminen epäonnistui'));
       };
 
       audio.oncanplaythrough = () => {
-        audio.play().catch(reject);
+        audio.play().catch((playError) => {
+          setIsPlaying(false);
+          setCurrentAudio(null);
+          reject(new Error('Audio toiston aloitus epäonnistui'));
+        });
       };
+
+      // Set a timeout to prevent hanging
+      setTimeout(() => {
+        if (audio.readyState === 0) {
+          setIsPlaying(false);
+          setCurrentAudio(null);
+          reject(new Error('Audio lataaminen aikakatkaistiin'));
+        }
+      }, 5000);
 
       // Preload the audio
       audio.load();
@@ -45,8 +58,9 @@ export const useAudioPlayer = () => {
     try {
       await playAudio('/female-greeting.mp3');
     } catch (error) {
-      console.error('Failed to play greeting:', error);
-      throw error;
+      console.warn('Greeting audio failed:', error);
+      // Don't throw error, just log it
+      throw new Error('Tervehdysääni ei ole saatavilla');
     }
   }, [playAudio]);
 
