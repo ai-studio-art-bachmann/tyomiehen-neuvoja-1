@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { VoiceButton } from '@/components/VoiceButton';
 import { DynamicResponsePanel } from '@/components/DynamicResponsePanel';
@@ -32,7 +31,7 @@ const Index = () => {
       <div className="max-w-sm mx-auto w-full px-2">
         <header className="bg-white/95 backdrop-blur-sm shadow-lg border-b border-orange-100 rounded-b-3xl">
           <div className="px-6 py-6">
-            <h1 className="text-3xl font-bold text-center text-orange-600 mb-2">
+            <h1 className="text-3xl font-bold text-center text-[#184560] mb-2">
               {t.headerTitle}
             </h1>
             <p className="text-sm text-gray-600 text-center leading-relaxed">
