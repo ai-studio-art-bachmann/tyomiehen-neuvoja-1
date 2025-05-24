@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { ConversationConfig } from '@/types/voice';
 import { useMicrophone } from './useMicrophone';
@@ -62,13 +61,29 @@ export const useConversation = (config: ConversationConfig) => {
       const responseData = await webhookService.sendAudioToWebhook(audioBlob, config.webhookUrl);
 
       state.setVoiceState(prev => ({ ...prev, status: 'playing', isPlaying: true }));
-      addSystemMessage('Toistan vastauksen...');
+      addSystemMessage('Käsittelen vastausta...');
 
-      if (responseData.startsWith('blob:')) {
-        addAssistantMessage('Äänivastaus', responseData);
-        await audioPlayer.playAudio(responseData);
-      } else {
-        addAssistantMessage(responseData);
+      // Check if response contains both text and audio
+      try {
+        const parsedResponse = JSON.parse(responseData);
+        if (parsedResponse.text && parsedResponse.audioUrl) {
+          // We have both text and audio
+          addAssistantMessage(parsedResponse.text, parsedResponse.audioUrl);
+          addSystemMessage('Toistan äänivastauksen...');
+          await audioPlayer.playAudio(parsedResponse.audioUrl);
+        } else {
+          // Only text response
+          addAssistantMessage(parsedResponse.text || responseData);
+        }
+      } catch (e) {
+        // Not JSON, treat as plain text or audio URL
+        if (responseData.startsWith('blob:')) {
+          addAssistantMessage('Äänivastaus', responseData);
+          addSystemMessage('Toistan äänivastauksen...');
+          await audioPlayer.playAudio(responseData);
+        } else {
+          addAssistantMessage(responseData);
+        }
       }
 
       state.setVoiceState({

@@ -35,17 +35,50 @@ export class WebhookService {
         throw new Error(`Palvelin vastasi virheellä: ${response.status} ${response.statusText}`);
       }
 
-      const contentType = response.headers.get('content-type');
-      console.log('Response content type:', contentType);
+      const data = await response.json();
+      console.log('Received JSON response:', data);
       
-      if (contentType && contentType.includes('audio')) {
-        const audioBlob = await response.blob();
-        const audioUrl = URL.createObjectURL(audioBlob);
-        console.log('Received audio response, created URL:', audioUrl);
-        return audioUrl;
+      // Handle the new response structure from n8n
+      if (data.success && data.textResponse && data.audioResponse) {
+        // Parse the textResponse which contains JSON
+        let textData;
+        try {
+          textData = JSON.parse(data.textResponse);
+        } catch (e) {
+          console.warn('Could not parse textResponse as JSON, using as string');
+          textData = { answer: data.textResponse };
+        }
+        
+        // Check if audioResponse is a base64 string or binary data
+        if (data.audioResponse && typeof data.audioResponse === 'string') {
+          // Convert base64 audio to blob and create URL
+          try {
+            // Remove data URL prefix if present
+            const base64Data = data.audioResponse.replace(/^data:audio\/[^;]+;base64,/, '');
+            const binaryString = atob(base64Data);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
+            const audioBlob = new Blob([bytes], { type: 'audio/mpeg' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            console.log('Created audio URL from base64:', audioUrl);
+            
+            // Return the text answer but also store audio URL for playback
+            return JSON.stringify({
+              text: textData.answer || textData.response || 'Vastausta ei saatu.',
+              audioUrl: audioUrl
+            });
+          } catch (error) {
+            console.error('Error converting base64 audio:', error);
+            return textData.answer || textData.response || 'Vastausta ei saatu.';
+          }
+        } else {
+          // No audio or invalid audio format
+          return textData.answer || textData.response || 'Vastausta ei saatu.';
+        }
       } else {
-        const data = await response.json();
-        console.log('Received JSON response:', data);
+        // Fallback for old response format
         return data.answer || data.response || 'Vastausta ei saatu.';
       }
     } catch (error) {
