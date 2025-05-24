@@ -1,0 +1,7 @@
+
+// This would be an actual MP3 file. For development, you can:
+// 1. Record a Finnish female voice saying: "Ole hyvä ja kerro, miten voin auttaa sinua tänään?"
+// 2. Use text-to-speech services like ElevenLabs, Google TTS, or OpenAI TTS
+// 3. Save as female-greeting.mp3 in the public folder
+// 
+// For now, create a placeholder file or use any MP3 file for testing

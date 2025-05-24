@@ -1,24 +1,51 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fi">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>puhe-kaveri-app</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+    <title>Työkalu App - Työmiehen paras kaveri</title>
+    <meta name="description" content="Ääniohjattu avustaja rakennustyömaan työntekijöille" />
+    <meta name="author" content="Työkalu Team" />
 
-    <meta property="og:title" content="puhe-kaveri-app" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#ea580c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Työkalu App" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+
+    <!-- Preconnect to improve performance -->
+    <link rel="preconnect" href="https://api.openai.com" />
+    <link rel="preconnect" href="https://n8n.yourdomain.com" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Työkalu App - Työmiehen paras kaveri" />
+    <meta property="og:description" content="Ääniohjattu avustaja rakennustyömaan työntekijöille" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:image" content="/icon-512.png" />
 
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta name="twitter:title" content="Työkalu App" />
+    <meta name="twitter:description" content="Ääniohjattu avustaja rakennustyömaan työntekijöille" />
+    <meta name="twitter:image" content="/icon-512.png" />
   </head>
 
   <body>
     <div id="root"></div>
+    
+    <!-- Offline Indicator -->
+    <div id="offline-indicator" style="display: none; position: fixed; top: 0; left: 0; right: 0; background: #f59e0b; color: white; text-align: center; padding: 4px; z-index: 1000; font-size: 12px;">
+      🔄 Ei yhteyttä - Toimi offline-tilassa
+    </div>
+
+    <!-- Install Button (hidden by default) -->
+    <button id="install-button" style="display: none; position: fixed; bottom: 20px; right: 20px; background: #ea580c; color: white; border: none; padding: 12px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; z-index: 1000;">
+      📱 Asenna sovellus
+    </button>
+
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
