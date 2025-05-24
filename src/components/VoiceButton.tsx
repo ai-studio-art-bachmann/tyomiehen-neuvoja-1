@@ -4,18 +4,20 @@ import { Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { VoiceState } from '@/types/voice';
 import { cn } from '@/lib/utils';
+import { getTranslations } from '@/utils/translations';
 
 interface VoiceButtonProps {
   voiceState: VoiceState;
   onPress: () => void;
   disabled?: boolean;
   isWaitingForClick?: boolean;
+  language: 'fi' | 'et' | 'en';
 }
 
-const getButtonState = (status: VoiceState['status'], isWaitingForClick: boolean = false) => {
+const getButtonState = (status: VoiceState['status'], isWaitingForClick: boolean = false, t: any) => {
   if (isWaitingForClick) {
     return {
-      text: 'Kliki kui oled valmis!',
+      text: t.readyForClick,
       color: 'bg-orange-500 hover:bg-orange-600',
       pulse: true
     };
@@ -24,43 +26,43 @@ const getButtonState = (status: VoiceState['status'], isWaitingForClick: boolean
   switch (status) {
     case 'idle':
       return {
-        text: 'Aloita keskustelu',
+        text: t.startConversation,
         color: 'bg-gray-400 hover:bg-gray-500',
         pulse: false
       };
     case 'greeting':
       return {
-        text: 'Tervehdys käynnissä...',
+        text: t.greetingInProgress,
         color: 'bg-blue-500',
         pulse: true
       };
     case 'recording':
       return {
-        text: 'Kuuntelen...',
+        text: t.listening,
         color: 'bg-red-500',
         pulse: true
       };
     case 'sending':
       return {
-        text: 'Lähetän...',
+        text: t.sending,
         color: 'bg-yellow-500',
         pulse: false
       };
     case 'waiting':
       return {
-        text: 'Odotan vastausta...',
+        text: t.waitingResponse,
         color: 'bg-blue-500',
         pulse: true
       };
     case 'playing':
       return {
-        text: 'Toistan vastausta...',
+        text: t.playingResponse,
         color: 'bg-green-500',
         pulse: false
       };
     default:
       return {
-        text: 'Aloita keskustelu',
+        text: t.startConversation,
         color: 'bg-gray-400 hover:bg-gray-500',
         pulse: false
       };
@@ -71,9 +73,11 @@ export const VoiceButton: React.FC<VoiceButtonProps> = ({
   voiceState,
   onPress,
   disabled = false,
-  isWaitingForClick = false
+  isWaitingForClick = false,
+  language
 }) => {
-  const buttonState = getButtonState(voiceState.status, isWaitingForClick);
+  const t = getTranslations(language);
+  const buttonState = getButtonState(voiceState.status, isWaitingForClick, t);
   const isDisabled = disabled || (voiceState.status !== 'idle' && !isWaitingForClick);
 
   return (

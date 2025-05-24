@@ -2,15 +2,19 @@
 import React, { useEffect, useRef } from 'react';
 import { ChatMessage } from '@/types/voice';
 import { ChatBubble } from './ChatBubble';
+import { getTranslations } from '@/utils/translations';
 
 interface DynamicResponsePanelProps {
   messages: ChatMessage[];
+  language: 'fi' | 'et' | 'en';
 }
 
 export const DynamicResponsePanel: React.FC<DynamicResponsePanelProps> = ({ 
-  messages 
+  messages,
+  language
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const t = getTranslations(language);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -28,7 +32,7 @@ export const DynamicResponsePanel: React.FC<DynamicResponsePanelProps> = ({
       {messages.length === 0 ? (
         <div className="flex items-center justify-center h-full">
           <p className="text-gray-500 text-center">
-            Paina mikrofonia aloittaaksesi keskustelun
+            {t.pressToStart}
           </p>
         </div>
       ) : (

@@ -6,6 +6,7 @@ import { LanguageSelector } from '@/components/LanguageSelector';
 import { useConversation } from '@/hooks/useConversation';
 import { ConversationConfig } from '@/types/voice';
 import { Button } from '@/components/ui/button';
+import { getTranslations } from '@/utils/translations';
 
 const Index = () => {
   const [config, setConfig] = useState<ConversationConfig>({
@@ -14,6 +15,7 @@ const Index = () => {
   });
 
   const conversation = useConversation(config);
+  const t = getTranslations(config.language);
 
   const handleLanguageChange = (language: ConversationConfig['language']) => {
     setConfig(prev => ({ ...prev, language }));
@@ -31,10 +33,10 @@ const Index = () => {
         <header className="bg-white/95 backdrop-blur-sm shadow-lg border-b border-orange-100 rounded-b-3xl">
           <div className="px-6 py-6">
             <h1 className="text-3xl font-bold text-center text-orange-600 mb-2">
-              Työmiehen paras kaveri!
+              {t.headerTitle}
             </h1>
             <p className="text-sm text-gray-600 text-center leading-relaxed">
-              Ääniohjattu työkalu rakennustyömaalle
+              {t.headerSubtitle}
             </p>
           </div>
         </header>
@@ -54,7 +56,10 @@ const Index = () => {
       <div className="flex-1 max-w-sm mx-auto w-full flex flex-col px-2 mt-4">
         {/* Chat Panel */}
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 flex-1 overflow-hidden">
-          <DynamicResponsePanel messages={conversation.messages} />
+          <DynamicResponsePanel 
+            messages={conversation.messages} 
+            language={config.language}
+          />
         </div>
 
         {/* Voice Controls */}
@@ -66,6 +71,7 @@ const Index = () => {
                 onPress={conversation.handleVoiceInteraction}
                 disabled={conversation.isDisabled}
                 isWaitingForClick={conversation.isWaitingForClick}
+                language={config.language}
               />
               
               {conversation.messages.length > 0 && (
@@ -75,7 +81,7 @@ const Index = () => {
                   onClick={handleReset}
                   className="text-xs px-4 py-2 rounded-full border-orange-200 text-orange-600 hover:bg-orange-50 transition-colors"
                 >
-                  Aloita alusta
+                  {t.resetConversation}
                 </Button>
               )}
             </div>
@@ -87,7 +93,7 @@ const Index = () => {
       <div className="max-w-sm mx-auto w-full px-2">
         <footer className="bg-white/80 backdrop-blur-sm border-t border-gray-200 py-3 rounded-t-xl">
           <p className="text-xs text-gray-500 text-center font-medium">
-            Powered by Työkalu App v1.0
+            {t.footerText}
           </p>
         </footer>
       </div>
