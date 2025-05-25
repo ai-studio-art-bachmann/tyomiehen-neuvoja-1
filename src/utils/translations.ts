@@ -1,6 +1,6 @@
-
 interface Translations {
   headerTitle: string;
+  customHeaderTitle?: string; // Added new optional key for the specific title
   headerSubtitle: string;
   footerText: string;
   resetConversation: string;
@@ -48,7 +48,8 @@ interface Translations {
 }
 
 const fiTranslations: Translations = {
-  headerTitle: 'Työkalu App',
+  headerTitle: 'Työkalu App', // This can remain as a general title if used elsewhere
+  customHeaderTitle: 'Älykästä apua työmaille', // New specific title
   headerSubtitle: 'Ääniohjattu avustaja rakennustyömaan työntekijöille',
   footerText: '© 2025 Työkalu Team',
   resetConversation: 'Aloita alusta',
@@ -97,6 +98,7 @@ const fiTranslations: Translations = {
 
 const etTranslations: Translations = {
   headerTitle: 'Tööriista rakendus',
+  customHeaderTitle: 'Nutikas abi ehitusplatsidele', // Estonian translation
   headerSubtitle: 'Häälkäsklustega abiline ehitustöötajatele',
   footerText: '© 2025 Tööriista meeskond',
   resetConversation: 'Alusta algusest',
@@ -145,6 +147,7 @@ const etTranslations: Translations = {
 
 const enTranslations: Translations = {
   headerTitle: 'Tool App',
+  customHeaderTitle: 'Smart help for construction sites', // English translation
   headerSubtitle: 'Voice-controlled assistant for construction workers',
   footerText: '© 2025 Tool App Team',
   resetConversation: 'Start over',

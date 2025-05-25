@@ -37,7 +37,7 @@ const Index = () => {
         <header className="bg-white/95 backdrop-blur-sm shadow-lg border-b border-orange-100 rounded-b-3xl">
           <div className="px-6 py-6">
             <h1 className="text-3xl font-bold text-center text-[#184560] mb-2">
-              {t.headerTitle}
+              {t.customHeaderTitle || t.headerTitle} {/* Use new title, fallback to old one */}
             </h1>
             <p className="text-sm text-gray-600 text-center leading-relaxed">
               {t.headerSubtitle}
