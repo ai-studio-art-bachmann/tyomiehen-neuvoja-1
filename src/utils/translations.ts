@@ -1,141 +1,205 @@
 
-export interface Translations {
-  // Header texts
+interface Translations {
   headerTitle: string;
   headerSubtitle: string;
-  
-  // Voice button states
-  startConversation: string;
-  greetingInProgress: string;
-  listening: string;
-  sending: string;
-  waitingResponse: string;
-  playingResponse: string;
-  readyForClick: string;
-  
-  // Chat messages
+  footerText: string;
+  resetConversation: string;
+  startConversationPrompt: string;
+  greetingPlayed: string;
+  readyToListen: string;
   startRecording: string;
   stopRecording: string;
   sendingToServer: string;
   processingResponse: string;
   playingAudio: string;
   readyForNext: string;
-  startConversationPrompt: string;
-  greetingPlayed: string;
-  readyToListen: string;
-  listeningClickWhenReady: string;
-  processingAudio: string;
-  
-  // Buttons and controls
-  resetConversation: string;
-  
-  // Empty state
   pressToStart: string;
-  
-  // Footer
-  footerText: string;
-  
-  // Error messages
+  processingAudio: string;
   voiceError: string;
+  recordingFailed: string;
   tryAgain: string;
   unknownError: string;
-  recordingFailed: string;
-  noAudioDetected: string;
+  listeningClickWhenReady: string;
+  
+  // File upload translations
+  files: string;
+  voice: string;
+  camera: string;
+  selectFile: string;
+  uploadFile: string;
+  uploading: string;
+  noFileSelected: string;
+  pleaseSelectFile: string;
+  fileUploaded: string;
+  fileUploadedSuccess: string;
+  uploadError: string;
+  
+  // Camera translations
+  startCamera: string;
+  stopCamera: string;
+  takePhoto: string;
+  retake: string;
+  uploadPhoto: string;
+  photoUploaded: string;
+  photoUploadedSuccess: string;
+  cameraError: string;
+  cameraPerm: string;
+  cameraOff: string;
 }
 
-export const translations: Record<'fi' | 'et' | 'en', Translations> = {
-  fi: {
-    headerTitle: 'Työmiehen paras kaveri!',
-    headerSubtitle: 'Ääniohjattu työkalu rakennustyömaalle',
-    startConversation: 'Aloita keskustelu',
-    greetingInProgress: 'Tervehdys käynnissä...',
-    listening: 'Kuuntelen...',
-    sending: 'Lähetän...',
-    waitingResponse: 'Odotan vastausta...',
-    playingResponse: 'Toistan vastausta...',
-    readyForClick: 'Kliki kun olet valmis!',
-    startRecording: 'Alusta puhuminen...',
-    stopRecording: 'Pysäytän nauhoituksen...',
-    sendingToServer: 'Lähetän palvelimelle...',
-    processingResponse: 'Käsittelen vastausta...',
-    playingAudio: 'Toistan äänivastauksen...',
-    readyForNext: 'Valmis seuraavaan kysymykseen!',
-    startConversationPrompt: 'Aloitan keskustelun...',
-    greetingPlayed: 'Tervehdys toistettu!',
-    readyToListen: 'Valmis kuuntelemaan!',
-    listeningClickWhenReady: 'Kuuntelen... Kliki uuesti kun olet valmis!',
-    processingAudio: 'Ääniviestin sisältö käsitellään...',
-    resetConversation: 'Aloita alusta',
-    pressToStart: 'Paina mikrofonia aloittaaksesi keskustelun',
-    footerText: 'Powered by Työkalu App v1.0',
-    voiceError: 'Virhe äänikäskyssä',
-    tryAgain: 'Yritä uudelleen',
-    unknownError: 'Tuntematon virhe',
-    recordingFailed: 'Äänitallennus epäonnistui - ei ääntä havaittu',
-    noAudioDetected: 'Ei ääntä havaittu'
-  },
-  et: {
-    headerTitle: 'Töömehe parim sõber!',
-    headerSubtitle: 'Häälega juhitav tööriist ehitusplatsile',
-    startConversation: 'Alusta vestlust',
-    greetingInProgress: 'Tervitus käib...',
-    listening: 'Kuulan...',
-    sending: 'Saadan...',
-    waitingResponse: 'Ootan vastust...',
-    playingResponse: 'Mängin vastust...',
-    readyForClick: 'Kliki kui oled valmis!',
-    startRecording: 'Alusta rääkimist...',
-    stopRecording: 'Peatan salvestamise...',
-    sendingToServer: 'Saadan serverisse...',
-    processingResponse: 'Töötlen vastust...',
-    playingAudio: 'Mängin helivastust...',
-    readyForNext: 'Valmis järgmiseks küsimuseks!',
-    startConversationPrompt: 'Alustan vestlust...',
-    greetingPlayed: 'Tervitus mängitud!',
-    readyToListen: 'Valmis kuulama!',
-    listeningClickWhenReady: 'Kuulan... Kliki uuesti kui oled valmis!',
-    processingAudio: 'Helistsõnumi sisu töödeldakse...',
-    resetConversation: 'Alusta otsast',
-    pressToStart: 'Vajuta mikrofoni vestluse alustamiseks',
-    footerText: 'Powered by Tööriistad App v1.0',
-    voiceError: 'Viga häälkäskluses',
-    tryAgain: 'Proovi uuesti',
-    unknownError: 'Tundmatu viga',
-    recordingFailed: 'Helisalvestus ebaõnnestus - heli ei tuvastatud',
-    noAudioDetected: 'Heli ei tuvastatud'
-  },
-  en: {
-    headerTitle: 'Worker\'s Best Friend!',
-    headerSubtitle: 'Voice-controlled tool for construction sites',
-    startConversation: 'Start conversation',
-    greetingInProgress: 'Greeting in progress...',
-    listening: 'Listening...',
-    sending: 'Sending...',
-    waitingResponse: 'Waiting for response...',
-    playingResponse: 'Playing response...',
-    readyForClick: 'Click when ready!',
-    startRecording: 'Start speaking...',
-    stopRecording: 'Stopping recording...',
-    sendingToServer: 'Sending to server...',
-    processingResponse: 'Processing response...',
-    playingAudio: 'Playing audio response...',
-    readyForNext: 'Ready for next question!',
-    startConversationPrompt: 'Starting conversation...',
-    greetingPlayed: 'Greeting played!',
-    readyToListen: 'Ready to listen!',
-    listeningClickWhenReady: 'Listening... Click again when ready!',
-    processingAudio: 'Audio message content being processed...',
-    resetConversation: 'Start over',
-    pressToStart: 'Press microphone to start conversation',
-    footerText: 'Powered by WorkTool App v1.0',
-    voiceError: 'Voice command error',
-    tryAgain: 'Try again',
-    unknownError: 'Unknown error',
-    recordingFailed: 'Audio recording failed - no audio detected',
-    noAudioDetected: 'No audio detected'
-  }
+const fiTranslations: Translations = {
+  headerTitle: 'Työkalu App',
+  headerSubtitle: 'Ääniohjattu avustaja rakennustyömaan työntekijöille',
+  footerText: '© 2025 Työkalu Team',
+  resetConversation: 'Aloita alusta',
+  startConversationPrompt: 'Tervetuloa! Paina painiketta puhuaksesi.',
+  greetingPlayed: 'Tervetuloa! Järjestelmä on valmiina.',
+  readyToListen: 'Valmiina kuuntelemaan.',
+  startRecording: 'Aloitan nauhoituksen...',
+  stopRecording: 'Nauhoitus pysäytetty.',
+  sendingToServer: 'Käsitellään viestiäsi...',
+  processingResponse: 'Valmistellaan vastausta...',
+  playingAudio: 'Toistetaan äänivastausta...',
+  readyForNext: 'Valmis uuteen kysymykseen.',
+  pressToStart: 'Paina nappia aloittaaksesi keskustelun',
+  processingAudio: 'Käsitellään puheviestiäsi...',
+  voiceError: 'Äänivirhe',
+  recordingFailed: 'Nauhoitus epäonnistui',
+  tryAgain: 'Yritä uudestaan',
+  unknownError: 'Tuntematon virhe',
+  listeningClickWhenReady: 'Kuuntelen... Paina painiketta kun olet valmis.',
+  
+  // File upload translations
+  files: "Tiedostot",
+  voice: "Ääni",
+  camera: "Kamera",
+  selectFile: "Valitse tiedosto",
+  uploadFile: "Lähetä tiedosto",
+  uploading: "Lähetetään...",
+  noFileSelected: "Ei tiedostoa valittu",
+  pleaseSelectFile: "Valitse tiedosto lähetettäväksi",
+  fileUploaded: "Tiedosto lähetetty",
+  fileUploadedSuccess: "Tiedosto lähetettiin onnistuneesti",
+  uploadError: "Lähetysvirhe",
+  
+  // Camera translations
+  startCamera: "Käynnistä kamera",
+  stopCamera: "Sammuta kamera",
+  takePhoto: "Ota kuva",
+  retake: "Ota uusi kuva",
+  uploadPhoto: "Lähetä kuva",
+  photoUploaded: "Kuva lähetetty",
+  photoUploadedSuccess: "Kuva lähetettiin onnistuneesti",
+  cameraError: "Kameravirhe",
+  cameraPerm: "Kameran käyttöoikeutta ei saatu. Anna sovellukselle lupa käyttää kameraa.",
+  cameraOff: "Kamera ei ole päällä"
+};
+
+const etTranslations: Translations = {
+  headerTitle: 'Tööriista rakendus',
+  headerSubtitle: 'Häälkäsklustega abiline ehitustöötajatele',
+  footerText: '© 2025 Tööriista meeskond',
+  resetConversation: 'Alusta algusest',
+  startConversationPrompt: 'Tere tulemast! Vajuta nuppu, et rääkida.',
+  greetingPlayed: 'Tere tulemast! Süsteem on valmis.',
+  readyToListen: 'Valmis kuulama.',
+  startRecording: 'Alustan salvestamist...',
+  stopRecording: 'Salvestamine peatatud.',
+  sendingToServer: 'Töötlen teie sõnumit...',
+  processingResponse: 'Valmistan vastust...',
+  playingAudio: 'Mängin häälvastust...',
+  readyForNext: 'Valmis järgmiseks küsimuseks.',
+  pressToStart: 'Vestluse alustamiseks vajuta nuppu',
+  processingAudio: 'Töötlen teie häälsõnumit...',
+  voiceError: 'Häälviga',
+  recordingFailed: 'Salvestamine ebaõnnestus',
+  tryAgain: 'Proovi uuesti',
+  unknownError: 'Tundmatu viga',
+  listeningClickWhenReady: 'Kuulan... Vajuta nuppu, kui oled valmis.',
+  
+  // File upload translations
+  files: "Failid",
+  voice: "Hääl",
+  camera: "Kaamera",
+  selectFile: "Vali fail",
+  uploadFile: "Saada fail",
+  uploading: "Saadan...",
+  noFileSelected: "Faili pole valitud",
+  pleaseSelectFile: "Vali fail üleslaadimiseks",
+  fileUploaded: "Fail saadetud",
+  fileUploadedSuccess: "Fail edukalt saadetud",
+  uploadError: "Saatmisviga",
+  
+  // Camera translations
+  startCamera: "Käivita kaamera",
+  stopCamera: "Peata kaamera",
+  takePhoto: "Tee pilt",
+  retake: "Tee uus pilt",
+  uploadPhoto: "Saada pilt",
+  photoUploaded: "Pilt saadetud",
+  photoUploadedSuccess: "Pilt edukalt saadetud",
+  cameraError: "Kaamera viga",
+  cameraPerm: "Ei saanud kaamera kasutusõigust. Palun luba rakendusel kaamerat kasutada.",
+  cameraOff: "Kaamera pole sisse lülitatud"
+};
+
+const enTranslations: Translations = {
+  headerTitle: 'Tool App',
+  headerSubtitle: 'Voice-controlled assistant for construction workers',
+  footerText: '© 2025 Tool App Team',
+  resetConversation: 'Start over',
+  startConversationPrompt: 'Welcome! Press the button to speak.',
+  greetingPlayed: 'Welcome! System is ready.',
+  readyToListen: 'Ready to listen.',
+  startRecording: 'Starting recording...',
+  stopRecording: 'Recording stopped.',
+  sendingToServer: 'Processing your message...',
+  processingResponse: 'Preparing response...',
+  playingAudio: 'Playing voice response...',
+  readyForNext: 'Ready for next question.',
+  pressToStart: 'Press button to start conversation',
+  processingAudio: 'Processing your voice message...',
+  voiceError: 'Voice Error',
+  recordingFailed: 'Recording failed',
+  tryAgain: 'Try again',
+  unknownError: 'Unknown error',
+  listeningClickWhenReady: 'Listening... Press button when you\'re done.',
+  
+  // File upload translations
+  files: "Files",
+  voice: "Voice",
+  camera: "Camera",
+  selectFile: "Select file",
+  uploadFile: "Upload file",
+  uploading: "Uploading...",
+  noFileSelected: "No file selected",
+  pleaseSelectFile: "Please select a file to upload",
+  fileUploaded: "File uploaded",
+  fileUploadedSuccess: "File was uploaded successfully",
+  uploadError: "Upload Error",
+  
+  // Camera translations
+  startCamera: "Start camera",
+  stopCamera: "Stop camera",
+  takePhoto: "Take photo",
+  retake: "Retake",
+  uploadPhoto: "Upload photo",
+  photoUploaded: "Photo uploaded",
+  photoUploadedSuccess: "Photo was uploaded successfully",
+  cameraError: "Camera Error",
+  cameraPerm: "Could not access the camera. Please grant permission.",
+  cameraOff: "Camera is off"
 };
 
 export const getTranslations = (language: 'fi' | 'et' | 'en'): Translations => {
-  return translations[language];
+  switch (language) {
+    case 'fi':
+      return fiTranslations;
+    case 'et':
+      return etTranslations;
+    case 'en':
+      return enTranslations;
+    default:
+      return fiTranslations;
+  }
 };

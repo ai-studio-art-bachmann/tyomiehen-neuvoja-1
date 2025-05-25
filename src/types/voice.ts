@@ -18,3 +18,17 @@ export interface ConversationConfig {
   language: 'fi' | 'et' | 'en';
   webhookUrl: string;
 }
+
+export interface FileUploadState {
+  isUploading: boolean;
+  progress: number;
+  error: string | null;
+}
+
+export interface CameraState {
+  isActive: boolean;
+  hasPhoto: boolean;
+  isUploading: boolean;
+  progress: number;
+  error: string | null;
+}

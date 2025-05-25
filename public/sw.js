@@ -1,11 +1,11 @@
-const CACHE_NAME = 'tyokalu-app-v1';
+
+const CACHE_NAME = 'tyokalu-app-v2';  // Updated version
 const STATIC_CACHE_URLS = [
   '/',
   '/index.html',
   '/manifest.json',
   '/female-greeting.mp3',
-  '/icon-192.png',
-  '/icon-512.png'
+  '/lovable-uploads/10bcea1a-822b-41ed-835a-637ece170831.png'  // New logo image
 ];
 
 // Install event - cache static resources
@@ -97,7 +97,14 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Background sync for offline audio uploads
+// Listen for the skip waiting message from the updated service worker
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+// Background sync for offline uploads
 self.addEventListener('sync', (event) => {
   if (event.tag === 'upload-audio') {
     console.log('Background sync: upload-audio');
@@ -105,7 +112,18 @@ self.addEventListener('sync', (event) => {
       // Handle offline audio uploads when connection is restored
       self.registration.showNotification('Työkalu App', {
         body: 'Yhteys palautettu. Voit jatkaa äänikeskustelua.',
-        icon: '/icon-192.png'
+        icon: '/lovable-uploads/10bcea1a-822b-41ed-835a-637ece170831.png'  // Updated icon
+      })
+    );
+  }
+  
+  if (event.tag === 'upload-file' || event.tag === 'upload-photo') {
+    console.log('Background sync:', event.tag);
+    event.waitUntil(
+      // Handle offline file uploads when connection is restored
+      self.registration.showNotification('Työkalu App', {
+        body: 'Yhteys palautettu. Tiedostot lähetetään.',
+        icon: '/lovable-uploads/10bcea1a-822b-41ed-835a-637ece170831.png'
       })
     );
   }
