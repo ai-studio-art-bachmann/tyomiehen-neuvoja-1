@@ -7,7 +7,7 @@ export class MessageManager {
   addMessage = (message: Omit<ChatMessage, 'id' | 'timestamp'>): ChatMessage => {
     this.messageIdCounter += 1;
     const newMessage: ChatMessage = {
-      ...message,
+      ...message, // See laotab laiali ka uued valikulised väljad fileUrl ja fileType
       id: `msg-${this.messageIdCounter}-${Date.now()}`,
       timestamp: new Date()
     };

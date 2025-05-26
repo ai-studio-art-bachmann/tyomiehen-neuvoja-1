@@ -1,6 +1,5 @@
-
 import { useCallback } from 'react';
-import { ConversationConfig } from '@/types/voice';
+import { ConversationConfig, ChatMessage } from '@/types/voice';
 import { useMicrophone } from './useMicrophone';
 import { useAudioPlayer } from './useAudioPlayer';
 import { useConversationState } from './useConversationState';
@@ -15,36 +14,38 @@ export const useConversation = (config: ConversationConfig) => {
   const audioPlayer = useAudioPlayer();
   const t = getTranslations(config.language);
   
-  const messageManager = new MessageManager();
-  const webhookService = new WebhookService();
+  // Initialize MessageManager instance within the hook or pass as dependency if created outside
+  const messageManager = React.useMemo(() => new MessageManager(), []); // Ensure stable instance
+  const webhookService = React.useMemo(() => new WebhookService(), []); // Ensure stable instance
 
   const addSystemMessage = useCallback((content: string) => {
     const message = messageManager.addSystemMessage(content);
     state.addMessage(message);
-  }, [state]);
+  }, [state, messageManager]);
 
   const addUserMessage = useCallback((content: string) => {
     const message = messageManager.addMessage({
       type: 'user',
       content
-    });
+    } as Omit<ChatMessage, 'id' | 'timestamp'>); // Ensure correct type for messageManager
     state.addMessage(message);
     return message;
-  }, [state]);
+  }, [state, messageManager]);
 
-  const addAssistantMessage = useCallback((content: string, audioUrl?: string) => {
+  const addAssistantMessage = useCallback((content: string, audioUrl?: string, fileUrl?: string, fileType?: string) => {
     const message = messageManager.addMessage({
       type: 'assistant',
       content,
-      audioUrl
-    });
+      audioUrl,
+      fileUrl,
+      fileType
+    } as Omit<ChatMessage, 'id' | 'timestamp'>); // Ensure correct type
     state.addMessage(message);
     return message;
-  }, [state]);
+  }, [state, messageManager]);
 
   const stopRecordingAndSend = useCallback(async () => {
     try {
-      // Stop any playing audio before processing new request
       audioPlayer.stopAudio();
       
       state.setVoiceState(prev => ({ ...prev, status: 'sending', isRecording: false }));
@@ -64,31 +65,39 @@ export const useConversation = (config: ConversationConfig) => {
       state.setVoiceState(prev => ({ ...prev, status: 'waiting' }));
       addSystemMessage(t.sendingToServer);
 
-      const responseData = await webhookService.sendAudioToWebhook(audioBlob, config.webhookUrl);
+      const responseDataString = await webhookService.sendAudioToWebhook(audioBlob, config.webhookUrl);
 
       state.setVoiceState(prev => ({ ...prev, status: 'playing', isPlaying: true }));
       addSystemMessage(t.processingResponse);
 
-      // Check if response contains both text and audio
       try {
-        const parsedResponse = JSON.parse(responseData);
-        if (parsedResponse.text && parsedResponse.audioUrl) {
-          // We have both text and audio
-          addAssistantMessage(parsedResponse.text, parsedResponse.audioUrl);
-          addSystemMessage(t.playingAudio);
-          await audioPlayer.playAudio(parsedResponse.audioUrl);
+        const parsedResponse = JSON.parse(responseDataString);
+        if (parsedResponse.text || parsedResponse.fileUrl) { // If there's text OR a file, process it
+          addAssistantMessage(
+            parsedResponse.text || (parsedResponse.fileType === 'image' ? t.imageReceived || 'Image received' : t.fileReceived || 'File received'), // Provide default content if text is missing but file exists
+            parsedResponse.audioUrl,
+            parsedResponse.fileUrl,
+            parsedResponse.fileType
+          );
+          if (parsedResponse.audioUrl) {
+            addSystemMessage(t.playingAudio);
+            await audioPlayer.playAudio(parsedResponse.audioUrl);
+          }
         } else {
-          // Only text response
-          addAssistantMessage(parsedResponse.text || responseData);
+          // Fallback if responseDataString is not JSON or doesn't have expected structure
+          // This should ideally not happen if webhookService always returns stringified JSON
+          addAssistantMessage(responseDataString);
         }
       } catch (e) {
-        // Not JSON, treat as plain text or audio URL
-        if (responseData.startsWith('blob:')) {
-          addAssistantMessage('Äänivastaus', responseData);
+        console.error("Error parsing webhook response or non-JSON response:", e, responseDataString);
+        // If responseDataString itself is a blob URL (legacy for pure audio)
+        if (responseDataString.startsWith('blob:')) {
+          addAssistantMessage('Äänivastaus', responseDataString);
           addSystemMessage(t.playingAudio);
-          await audioPlayer.playAudio(responseData);
+          await audioPlayer.playAudio(responseDataString);
         } else {
-          addAssistantMessage(responseData);
+          // Treat as plain text if not parsable and not a blob
+          addAssistantMessage(responseDataString || t.unknownError);
         }
       }
 
@@ -120,20 +129,17 @@ export const useConversation = (config: ConversationConfig) => {
 
       addSystemMessage(`${t.voiceError}: ${error instanceof Error ? error.message : t.unknownError}`);
     }
-  }, [microphone, audioPlayer, config.webhookUrl, state, addSystemMessage, addUserMessage, addAssistantMessage, t]);
+  }, [microphone, audioPlayer, config.webhookUrl, state, addSystemMessage, addUserMessage, addAssistantMessage, t, webhookService, messageManager]);
 
   const handleVoiceInteraction = useCallback(async () => {
     try {
-      // Stop any playing audio before starting new interaction
       audioPlayer.stopAudio();
       
-      // If waiting for click to stop recording
       if (state.isWaitingForClick) {
         await stopRecordingAndSend();
         return;
       }
 
-      // First interaction: try to play greeting
       if (state.isFirstInteraction) {
         state.setVoiceState(prev => ({ ...prev, status: 'greeting' }));
         addSystemMessage(t.startConversationPrompt);
@@ -149,15 +155,12 @@ export const useConversation = (config: ConversationConfig) => {
         state.setIsFirstInteraction(false);
       }
 
-      // Start recording
       state.setVoiceState(prev => ({ ...prev, status: 'recording', isRecording: true }));
       state.setIsWaitingForClick(true);
       addSystemMessage(t.startRecording);
       
       await microphone.startRecording();
       addSystemMessage(t.listeningClickWhenReady);
-
-      // No automatic timeout - user controls when to send
 
     } catch (error) {
       console.error('Voice interaction error:', error);
@@ -185,10 +188,10 @@ export const useConversation = (config: ConversationConfig) => {
   const reset = useCallback(() => {
     microphone.cleanup();
     audioPlayer.stopAudio();
-    webhookService.cleanup();
+    webhookService.cleanup(); // Assuming webhookService has a cleanup
     state.reset();
-    messageManager.reset();
-  }, [microphone, audioPlayer, state]);
+    messageManager.reset(); // Assuming messageManager has a reset
+  }, [microphone, audioPlayer, state, webhookService, messageManager]);
 
   return {
     voiceState: state.voiceState,

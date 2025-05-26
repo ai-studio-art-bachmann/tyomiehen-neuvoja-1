@@ -1,6 +1,6 @@
 interface Translations {
   headerTitle: string;
-  customHeaderTitle?: string; // Added new optional key for the specific title
+  customHeaderTitle?: string;
   headerSubtitle: string;
   footerText: string;
   resetConversation: string;
@@ -45,13 +45,24 @@ interface Translations {
   cameraError: string;
   cameraPerm: string;
   cameraOff: string;
+  
+  // New translations for file/image messages
+  imageReceived: string;
+  fileReceived: string;
+  readyForClick: string;
+  startConversation: string;
+  greetingInProgress: string;
+  listening: string;
+  sending: string;
+  waitingResponse: string;
+  playingResponse: string;
 }
 
 const fiTranslations: Translations = {
-  headerTitle: 'Työkalu App', // This can remain as a general title if used elsewhere
-  customHeaderTitle: 'Älykästä apua työmaille', // New specific title
+  headerTitle: 'Työkalu App',
+  customHeaderTitle: 'Älykästä apua työmaille',
   headerSubtitle: 'Ääniohjattu avustaja rakennustyömaan työntekijöille',
-  footerText: '© 2025 Työkalu Team',
+  footerText: '© 2025 AI Studio Art Bachmann',
   resetConversation: 'Aloita alusta',
   startConversationPrompt: 'Tervetuloa! Paina painiketta puhuaksesi.',
   greetingPlayed: 'Tervetuloa! Järjestelmä on valmiina.',
@@ -69,8 +80,7 @@ const fiTranslations: Translations = {
   tryAgain: 'Yritä uudestaan',
   unknownError: 'Tuntematon virhe',
   listeningClickWhenReady: 'Kuuntelen... Paina painiketta kun olet valmis.',
-  
-  // File upload translations
+
   files: "Tiedostot",
   voice: "Ääni",
   camera: "Kamera",
@@ -83,7 +93,6 @@ const fiTranslations: Translations = {
   fileUploadedSuccess: "Tiedosto lähetettiin onnistuneesti",
   uploadError: "Lähetysvirhe",
   
-  // Camera translations
   startCamera: "Käynnistä kamera",
   stopCamera: "Sammuta kamera",
   takePhoto: "Ota kuva",
@@ -93,14 +102,24 @@ const fiTranslations: Translations = {
   photoUploadedSuccess: "Kuva lähetettiin onnistuneesti",
   cameraError: "Kameravirhe",
   cameraPerm: "Kameran käyttöoikeutta ei saatu. Anna sovellukselle lupa käyttää kameraa.",
-  cameraOff: "Kamera ei ole päällä"
+  cameraOff: "Kamera ei ole päällä",
+
+  imageReceived: "Pilt vastu võetud",
+  fileReceived: "Fail vastu võetud",
+  readyForClick: "Valmis klõpsamiseks",
+  startConversation: "Aloita keskustelu",
+  greetingInProgress: "Tervehdys käynnissä...",
+  listening: "Kuuntelen...",
+  sending: "Lähetetään...",
+  waitingResponse: "Odotetaan vastausta...",
+  playingResponse: "Toistetaan vastausta..."
 };
 
 const etTranslations: Translations = {
   headerTitle: 'Tööriista rakendus',
-  customHeaderTitle: 'Nutikas abi ehitusplatsidele', // Estonian translation
+  customHeaderTitle: 'Nutikas abi ehitusplatsidele',
   headerSubtitle: 'Häälkäsklustega abiline ehitustöötajatele',
-  footerText: '© 2025 Tööriista meeskond',
+  footerText: '© 2025 AI Studio Art Bachmann',
   resetConversation: 'Alusta algusest',
   startConversationPrompt: 'Tere tulemast! Vajuta nuppu, et rääkida.',
   greetingPlayed: 'Tere tulemast! Süsteem on valmis.',
@@ -119,7 +138,6 @@ const etTranslations: Translations = {
   unknownError: 'Tundmatu viga',
   listeningClickWhenReady: 'Kuulan... Vajuta nuppu, kui oled valmis.',
   
-  // File upload translations
   files: "Failid",
   voice: "Hääl",
   camera: "Kaamera",
@@ -132,7 +150,6 @@ const etTranslations: Translations = {
   fileUploadedSuccess: "Fail edukalt saadetud",
   uploadError: "Saatmisviga",
   
-  // Camera translations
   startCamera: "Käivita kaamera",
   stopCamera: "Peata kaamera",
   takePhoto: "Tee pilt",
@@ -142,14 +159,24 @@ const etTranslations: Translations = {
   photoUploadedSuccess: "Pilt edukalt saadetud",
   cameraError: "Kaamera viga",
   cameraPerm: "Ei saanud kaamera kasutusõigust. Palun luba rakendusel kaamerat kasutada.",
-  cameraOff: "Kaamera pole sisse lülitatud"
+  cameraOff: "Kaamera pole sisse lülitatud",
+
+  imageReceived: "Pilt vastu võetud",
+  fileReceived: "Fail vastu võetud",
+  readyForClick: "Valmis klikkimiseks",
+  startConversation: "Alusta vestlust",
+  greetingInProgress: "Tervitus käib...",
+  listening: "Kuulan...",
+  sending: "Saadan...",
+  waitingResponse: "Ootan vastust...",
+  playingResponse: "Mängin vastust..."
 };
 
 const enTranslations: Translations = {
   headerTitle: 'Tool App',
-  customHeaderTitle: 'Smart help for construction sites', // English translation
+  customHeaderTitle: 'Smart help for construction sites',
   headerSubtitle: 'Voice-controlled assistant for construction workers',
-  footerText: '© 2025 Tool App Team',
+  footerText: '© 2025 AI Studio Art Bachmann',
   resetConversation: 'Start over',
   startConversationPrompt: 'Welcome! Press the button to speak.',
   greetingPlayed: 'Welcome! System is ready.',
@@ -168,7 +195,6 @@ const enTranslations: Translations = {
   unknownError: 'Unknown error',
   listeningClickWhenReady: 'Listening... Press button when you\'re done.',
   
-  // File upload translations
   files: "Files",
   voice: "Voice",
   camera: "Camera",
@@ -181,7 +207,6 @@ const enTranslations: Translations = {
   fileUploadedSuccess: "File was uploaded successfully",
   uploadError: "Upload Error",
   
-  // Camera translations
   startCamera: "Start camera",
   stopCamera: "Stop camera",
   takePhoto: "Take photo",
@@ -191,7 +216,17 @@ const enTranslations: Translations = {
   photoUploadedSuccess: "Photo was uploaded successfully",
   cameraError: "Camera Error",
   cameraPerm: "Could not access the camera. Please grant permission.",
-  cameraOff: "Camera is off"
+  cameraOff: "Camera is off",
+
+  imageReceived: "Image received",
+  fileReceived: "File received",
+  readyForClick: "Ready for click",
+  startConversation: "Start conversation",
+  greetingInProgress: "Greeting in progress...",
+  listening: "Listening...",
+  sending: "Sending...",
+  waitingResponse: "Waiting for response...",
+  playingResponse: "Playing response..."
 };
 
 export const getTranslations = (language: 'fi' | 'et' | 'en'): Translations => {

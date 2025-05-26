@@ -1,4 +1,3 @@
-
 export interface VoiceState {
   status: 'idle' | 'greeting' | 'recording' | 'sending' | 'waiting' | 'playing';
   isRecording: boolean;
@@ -12,6 +11,8 @@ export interface ChatMessage {
   content: string;
   timestamp: Date;
   audioUrl?: string;
+  fileUrl?: string; // Uus: faili URL
+  fileType?: 'image' | 'pdf' | 'doc' | 'generic' | string; // Uus: faili tüüp (MIME tüüp või laiend)
 }
 
 export interface ConversationConfig {

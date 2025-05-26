@@ -1,4 +1,3 @@
-
 export class WebhookService {
   private abortController: AbortController | null = null;
 
@@ -21,7 +20,7 @@ export class WebhookService {
       const response = await fetch(webhookUrl, {
         method: 'POST',
         body: formData,
-        signal: controller.signal,
+        signal: this.abortController.signal,
         mode: 'cors',
         headers: {
           'Accept': 'audio/mpeg,application/json,*/*'
@@ -36,50 +35,58 @@ export class WebhookService {
       }
 
       const data = await response.json();
-      console.log('Received JSON response:', data);
+      console.log('Received JSON response from n8n:', data);
       
-      // Handle the new response structure from n8n
-      if (data.success && data.textResponse && data.audioResponse) {
-        // Parse the textResponse which contains JSON
-        let textData;
-        try {
-          textData = JSON.parse(data.textResponse);
-        } catch (e) {
-          console.warn('Could not parse textResponse as JSON, using as string');
-          textData = { answer: data.textResponse };
-        }
-        
-        // Check if audioResponse is a base64 string or binary data
-        if (data.audioResponse && typeof data.audioResponse === 'string') {
-          // Convert base64 audio to blob and create URL
+      // Handle the n8n response structure that might include file data
+      if (data.success !== undefined || data.textResponse !== undefined || data.audioResponse !== undefined || data.fileUrl !== undefined || data.fileResponse !== undefined) {
+        let textData = { answer: 'Vastausta ei saatu.' };
+        if (data.textResponse) {
           try {
-            // Remove data URL prefix if present
+            textData = JSON.parse(data.textResponse);
+          } catch (e) {
+            console.warn('Could not parse textResponse as JSON, using as string');
+            textData = { answer: data.textResponse };
+          }
+        } else if (data.answer) { // Fallback if textResponse is not present but answer is
+            textData = { answer: data.answer };
+        }
+
+        let audioUrl: string | undefined = undefined;
+        if (data.audioResponse && typeof data.audioResponse === 'string') {
+          try {
             const base64Data = data.audioResponse.replace(/^data:audio\/[^;]+;base64,/, '');
             const binaryString = atob(base64Data);
             const bytes = new Uint8Array(binaryString.length);
             for (let i = 0; i < binaryString.length; i++) {
               bytes[i] = binaryString.charCodeAt(i);
             }
-            const audioBlob = new Blob([bytes], { type: 'audio/mpeg' });
-            const audioUrl = URL.createObjectURL(audioBlob);
+            const audioBlobContent = new Blob([bytes], { type: 'audio/mpeg' });
+            audioUrl = URL.createObjectURL(audioBlobContent);
             console.log('Created audio URL from base64:', audioUrl);
-            
-            // Return the text answer but also store audio URL for playback
-            return JSON.stringify({
-              text: textData.answer || textData.response || 'Vastausta ei saatu.',
-              audioUrl: audioUrl
-            });
           } catch (error) {
             console.error('Error converting base64 audio:', error);
-            return textData.answer || textData.response || 'Vastausta ei saatu.';
           }
-        } else {
-          // No audio or invalid audio format
-          return textData.answer || textData.response || 'Vastausta ei saatu.';
+        } else if (data.audioUrl) { // Fallback for direct audioUrl
+            audioUrl = data.audioUrl;
         }
+        
+        const fileUrl = data.fileUrl || (data.fileResponse ? data.fileResponse.url : undefined);
+        const fileType = data.fileType || (data.fileResponse ? data.fileResponse.type : undefined);
+
+        return JSON.stringify({
+          text: textData.answer || textData.response || 'Vastausta ei saatu.',
+          audioUrl: audioUrl,
+          fileUrl: fileUrl,
+          fileType: fileType
+        });
       } else {
-        // Fallback for old response format
-        return data.answer || data.response || 'Vastausta ei saatu.';
+        // Fallback for simpler/direct response format (already JSON object)
+        return JSON.stringify({
+            text: data.answer || data.response || 'Vastausta ei saatu.',
+            audioUrl: data.audioUrl,
+            fileUrl: data.fileUrl,
+            fileType: data.fileType
+        });
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
