@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { ConversationConfig } from '@/types/voice';
 import { useMicrophone } from './useMicrophone';
@@ -6,7 +5,7 @@ import { useAudioPlayer } from './useAudioPlayer';
 import { useConversationState } from './useConversationState';
 import { toast } from '@/hooks/use-toast';
 import { WebhookService } from '@/services/webhookService';
-import { getTranslations } from '@/utils/translations';
+import { getTranslations } from '@/translations'; // Updated import path
 import { ChatMessage } from '@/types/voice'; // For MessageAdders return types
 
 // Types for the message functions expected from useMessageManagement
@@ -45,7 +44,7 @@ export const useVoiceHandler = ({
   const { 
     addSystemMessage, 
     addUserMessage, 
-    addAssistantMessage, // Keep for direct fallback if needed
+    addAssistantMessage, 
     addAssistantMessageWithDefaults 
   } = messageAdders;
 

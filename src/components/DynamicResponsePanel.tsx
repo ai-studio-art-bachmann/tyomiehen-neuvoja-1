@@ -1,12 +1,11 @@
-
 import React, { useEffect, useRef } from 'react';
 import { ChatMessage } from '@/types/voice';
 import { ChatBubble } from './ChatBubble';
-import { getTranslations } from '@/utils/translations';
+import { getTranslations, Language } from '@/translations'; // Updated import path and added Language type
 
 interface DynamicResponsePanelProps {
   messages: ChatMessage[];
-  language: 'fi' | 'et' | 'en';
+  language: Language; // Use imported Language type
 }
 
 export const DynamicResponsePanel: React.FC<DynamicResponsePanelProps> = ({ 

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { ChatMessage, ConversationConfig } from '@/types/voice';
 import { MessageManager } from '@/utils/messages';
-import { getTranslations } from '@/utils/translations';
+import { getTranslations } from '@/translations';
 
 interface UseMessageManagementProps {
   addMessageToState: (message: ChatMessage) => void;
@@ -52,8 +52,6 @@ export const useMessageManagement = ({
         ? (fileType?.startsWith('image/') ? t.imageReceived : t.fileReceived) 
         : ''; // No default content if no file
       
-      // Use responseText if available, otherwise use defaultContentForFile if a file exists,
-      // otherwise, if no text and no file, use a generic error message.
       const contentToDisplay = responseText || defaultContentForFile || t.unknownError;
 
       return addAssistantMessage(contentToDisplay, audioUrl, fileUrl, fileType);
