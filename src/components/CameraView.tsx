@@ -15,7 +15,7 @@ export const CameraView: React.FC<CameraViewProps> = ({ videoRef, isCameraOn, ph
       <div className="relative w-full rounded-lg overflow-hidden">
         <img 
           src={photoTaken} 
-          alt={t.capturedPhotoAlt || "Captured photo"}
+          alt={t.capturedPhotoAlt} // Nüüd peaks see alati olema defineeritud
           className="w-full" 
         />
       </div>

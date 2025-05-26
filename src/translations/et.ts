@@ -1,4 +1,3 @@
-
 import { Translations } from './types';
 
 export const etTranslations: Translations = {
@@ -46,7 +45,8 @@ export const etTranslations: Translations = {
   cameraError: "Kaamera viga",
   cameraPerm: "Ei saanud kaamera kasutusõigust. Palun luba rakendusel kaamerat kasutada.",
   cameraOff: "Kaamera pole sisse lülitatud",
-
+  capturedPhotoAlt: "Jäädvustatud foto",
+  
   imageReceived: "Pilt vastu võetud",
   fileReceived: "Fail vastu võetud",
   readyForClick: "Valmis klikkimiseks",
@@ -57,4 +57,3 @@ export const etTranslations: Translations = {
   waitingResponse: "Ootan vastust...",
   playingResponse: "Mängin vastust..."
 };
-

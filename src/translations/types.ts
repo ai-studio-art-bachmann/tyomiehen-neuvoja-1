@@ -46,6 +46,7 @@ export interface Translations {
   cameraError: string;
   cameraPerm: string;
   cameraOff: string;
+  capturedPhotoAlt: string; // Lisatud uus tõlkevõti
   
   // New translations for file/image messages
   imageReceived: string;
@@ -58,4 +59,3 @@ export interface Translations {
   waitingResponse: string;
   playingResponse: string;
 }
-

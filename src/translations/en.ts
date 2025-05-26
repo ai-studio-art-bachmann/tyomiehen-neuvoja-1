@@ -1,4 +1,3 @@
-
 import { Translations } from './types';
 
 export const enTranslations: Translations = {
@@ -46,7 +45,8 @@ export const enTranslations: Translations = {
   cameraError: "Camera Error",
   cameraPerm: "Could not access the camera. Please grant permission.",
   cameraOff: "Camera is off",
-
+  capturedPhotoAlt: "Captured photo",
+  
   imageReceived: "Image received",
   fileReceived: "File received",
   readyForClick: "Ready for click",
@@ -57,4 +57,3 @@ export const enTranslations: Translations = {
   waitingResponse: "Waiting for response...",
   playingResponse: "Playing response..."
 };
-
