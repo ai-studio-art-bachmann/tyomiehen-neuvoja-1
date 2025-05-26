@@ -1,9 +1,8 @@
-
 import React, { useRef, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
-import { getTranslations } from '@/utils/translations';
+import { getTranslations } from '@/translations';
 
 interface CameraProps {
   webhookUrl: string;
@@ -61,16 +60,12 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
       const video = videoRef.current;
       const canvas = canvasRef.current;
       
-      // Set canvas dimensions to match video
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       
-      // Draw video frame on canvas
       const context = canvas.getContext('2d');
       if (context) {
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        // Get data URL representing the image
         const dataUrl = canvas.toDataURL('image/jpeg');
         setPhotoTaken(dataUrl);
       }
@@ -88,14 +83,10 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
     setProgress(10);
     
     try {
-      // Convert data URL to blob
       const response = await fetch(photoTaken);
       const blob = await response.blob();
-      
-      // Create file name with current timestamp
       const filename = `photo_${new Date().toISOString().replace(/:/g, '-')}.jpg`;
       
-      // Create form data
       const formData = new FormData();
       formData.append('file', blob, filename);
       formData.append('filename', filename);
@@ -104,7 +95,6 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
       
       setProgress(30);
       
-      // Send to webhook
       const uploadResponse = await fetch(webhookUrl, {
         method: 'POST',
         body: formData,
@@ -122,7 +112,6 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
       
       setProgress(100);
       
-      // Handle the response
       const data = await uploadResponse.json();
       console.log('Photo upload response:', data);
       
@@ -131,7 +120,6 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
         description: t.photoUploadedSuccess || "Photo was uploaded successfully",
       });
       
-      // Reset photo
       setPhotoTaken(null);
       
     } catch (error) {
@@ -147,7 +135,6 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
     }
   }, [photoTaken, webhookUrl, t]);
 
-  // Clean up on unmount
   React.useEffect(() => {
     return () => {
       if (streamRef.current) {

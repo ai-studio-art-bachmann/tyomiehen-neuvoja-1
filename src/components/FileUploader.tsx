@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
-import { getTranslations } from '@/utils/translations';
+import { getTranslations } from '@/translations';
 
 interface FileUploaderProps {
   webhookUrl: string;
@@ -37,18 +36,14 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ webhookUrl, language
       setIsUploading(true);
       setProgress(10);
 
-      // Create a FormData object to hold the file
       const formData = new FormData();
       formData.append('file', selectedFile);
-      
-      // Add metadata
       formData.append('filename', selectedFile.name);
       formData.append('filetype', selectedFile.type);
       formData.append('source', 'file_upload');
 
       setProgress(30);
 
-      // Send the file to the webhook
       const response = await fetch(webhookUrl, {
         method: 'POST',
         body: formData,
@@ -66,7 +61,6 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ webhookUrl, language
 
       setProgress(100);
 
-      // Handle the response
       const data = await response.json();
       console.log('File upload response:', data);
       
@@ -75,7 +69,6 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ webhookUrl, language
         description: t.fileUploadedSuccess || "File was uploaded successfully",
       });
 
-      // Reset the file selection
       setSelectedFile(null);
       const fileInput = document.getElementById('file-upload') as HTMLInputElement;
       if (fileInput) {
@@ -91,7 +84,6 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ webhookUrl, language
       });
     } finally {
       setIsUploading(false);
-      // Reset progress after 1 second to show the complete state
       setTimeout(() => setProgress(0), 1000);
     }
   };

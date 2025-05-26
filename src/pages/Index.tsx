@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { VoiceButton } from '@/components/VoiceButton';
 import { DynamicResponsePanel } from '@/components/DynamicResponsePanel';
@@ -6,7 +5,7 @@ import { LanguageSelector } from '@/components/LanguageSelector';
 import { useConversation } from '@/hooks/useConversation';
 import { ConversationConfig } from '@/types/voice';
 import { Button } from '@/components/ui/button';
-import { getTranslations } from '@/utils/translations';
+import { getTranslations } from '@/translations';
 import { FileUploader } from '@/components/FileUploader';
 import { Camera } from '@/components/Camera';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

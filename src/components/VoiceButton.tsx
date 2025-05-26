@@ -3,7 +3,7 @@ import { Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { VoiceState } from '@/types/voice';
 import { cn } from '@/lib/utils';
-import { getTranslations } from '@/utils/translations';
+import { getTranslations } from '@/translations';
 
 interface VoiceButtonProps {
   voiceState: VoiceState;
