@@ -74,7 +74,7 @@ export class WebhookService {
         const fileType = data.fileType || (data.fileResponse ? data.fileResponse.type : undefined);
 
         return JSON.stringify({
-          text: textData.answer || textData.response || 'Vastausta ei saatu.',
+          text: textData.answer || 'Vastausta ei saatu.',
           audioUrl: audioUrl,
           fileUrl: fileUrl,
           fileType: fileType
@@ -82,7 +82,7 @@ export class WebhookService {
       } else {
         // Fallback for simpler/direct response format (already JSON object)
         return JSON.stringify({
-            text: data.answer || data.response || 'Vastausta ei saatu.',
+            text: data.answer || 'Vastausta ei saatu.',
             audioUrl: data.audioUrl,
             fileUrl: data.fileUrl,
             fileType: data.fileType
