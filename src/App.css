@@ -1,4 +1,3 @@
-
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -49,13 +48,4 @@
 
 .animate-gentle-pulse {
   animation: gentle-pulse-kf 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes recording-pulse-kf {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-
-.animate-recording-pulse {
-  animation: recording-pulse-kf 1.8s ease-in-out infinite;
 }

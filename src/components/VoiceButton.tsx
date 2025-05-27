@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -88,14 +87,12 @@ export const VoiceButton: React.FC<VoiceButtonProps> = ({
         className={cn(
           'w-24 h-24 rounded-full transition-all duration-200',
           buttonState.color,
-          isWaitingForClick || voiceState.status === 'recording' 
-            ? 'animate-recording-pulse' 
-            : (buttonState.pulse && 'animate-pulse'),
+          isWaitingForClick ? 'animate-gentle-pulse' : (buttonState.pulse && 'animate-pulse'),
           isDisabled && 'opacity-70 cursor-not-allowed'
         )}
         size="lg"
       >
-        <Mic className="w-24 h-24 text-white scale-[0.33] transform" />
+        <Mic className="w-8 h-8 text-white" />
       </Button>
       
       <p className="text-sm font-medium text-gray-700 text-center">
