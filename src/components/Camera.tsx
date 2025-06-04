@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { getTranslations } from '@/translations';
@@ -52,16 +51,17 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
 
   const handleStartListening = async () => {
     try {
-      const filename = await startListeningForName();
-      console.log('Got filename from voice:', filename);
+      const result = await startListeningForName();
+      console.log('Got voice naming result:', result);
       
-      // Upload with custom filename
-      await uploadPhoto(filename);
+      // Upload with custom filename and metadata
+      await uploadPhoto(result.filename, result.metadata);
       setIsWaitingForName(false);
       
+      const metadataText = result.metadata.unit ? ` (${result.metadata.unit})` : '';
       toast({
         title: "Foto nimetatud ja üles laetud",
-        description: `Failinimi: ${filename}.jpg`,
+        description: `Failinimi: ${result.filename}.jpg${metadataText}`,
       });
     } catch (error) {
       console.error('Voice naming error:', error);
@@ -75,16 +75,17 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
 
   const handleStopListening = async () => {
     try {
-      const filename = await stopListeningForName();
-      console.log('Got filename from voice:', filename);
+      const result = await stopListeningForName();
+      console.log('Got voice naming result:', result);
       
-      // Upload with custom filename
-      await uploadPhoto(filename);
+      // Upload with custom filename and metadata
+      await uploadPhoto(result.filename, result.metadata);
       setIsWaitingForName(false);
       
+      const metadataText = result.metadata.unit ? ` (${result.metadata.unit})` : '';
       toast({
         title: "Foto nimetatud ja üles laetud",
-        description: `Failinimi: ${filename}.jpg`,
+        description: `Failinimi: ${result.filename}.jpg${metadataText}`,
       });
     } catch (error) {
       console.error('Voice naming error:', error);

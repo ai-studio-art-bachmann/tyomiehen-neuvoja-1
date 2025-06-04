@@ -10,11 +10,17 @@ interface UsePhotoUploadProps {
   onUploadSuccess: () => void;
 }
 
+interface PhotoMetadata {
+  location?: string;
+  unit?: string;
+  description?: string;
+}
+
 export const usePhotoUpload = ({ webhookUrl, photoTaken, t, onUploadSuccess }: UsePhotoUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  const uploadPhoto = useCallback(async (customFilename?: string) => {
+  const uploadPhoto = useCallback(async (customFilename?: string, metadata?: PhotoMetadata) => {
     if (!photoTaken) return;
     
     setIsUploading(true);
@@ -33,6 +39,20 @@ export const usePhotoUpload = ({ webhookUrl, photoTaken, t, onUploadSuccess }: U
       formData.append('filename', filename);
       formData.append('filetype', 'image/jpeg');
       formData.append('source', 'camera');
+      
+      // Add metadata if provided
+      if (metadata) {
+        formData.append('metadata', JSON.stringify(metadata));
+        if (metadata.location) {
+          formData.append('location', metadata.location);
+        }
+        if (metadata.unit) {
+          formData.append('unit', metadata.unit);
+        }
+        if (metadata.description) {
+          formData.append('description', metadata.description);
+        }
+      }
       
       setProgress(30);
       
@@ -56,9 +76,11 @@ export const usePhotoUpload = ({ webhookUrl, photoTaken, t, onUploadSuccess }: U
       const data = await uploadResponse.json();
       console.log('Photo upload response:', data);
       
+      const metadataText = metadata ? ` (${metadata.unit || ''} ${metadata.location || ''})`.trim() : '';
+      
       toast({
         title: t.photoUploaded || "Photo uploaded",
-        description: `${t.photoUploadedSuccess || "Photo was uploaded successfully"} (${filename})`,
+        description: `${t.photoUploadedSuccess || "Photo was uploaded successfully"} (${filename})${metadataText}`,
       });
       
       onUploadSuccess();

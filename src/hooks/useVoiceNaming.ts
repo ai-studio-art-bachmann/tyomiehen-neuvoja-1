@@ -9,13 +9,22 @@ interface UseVoiceNamingProps {
   webhookUrl: string;
 }
 
+interface VoiceNamingResult {
+  filename: string;
+  metadata: {
+    location?: string;
+    unit?: string;
+    description?: string;
+  };
+}
+
 export const useVoiceNaming = ({ t, webhookUrl }: UseVoiceNamingProps) => {
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const microphone = useMicrophone();
   const webhookService = new WebhookService();
 
-  const startListeningForName = useCallback(async (): Promise<string> => {
+  const startListeningForName = useCallback(async (): Promise<VoiceNamingResult> => {
     return new Promise(async (resolve, reject) => {
       try {
         setIsListening(true);
@@ -44,12 +53,12 @@ export const useVoiceNaming = ({ t, webhookUrl }: UseVoiceNamingProps) => {
                 transcription = response;
               }
               
-              // Convert transcription to filename
-              const filename = convertToFilename(transcription);
-              console.log('Transcription:', transcription, 'Filename:', filename);
+              // Parse transcription to extract filename and metadata
+              const result = parseVoiceInput(transcription);
+              console.log('Transcription:', transcription, 'Parsed result:', result);
               
               setIsProcessing(false);
-              resolve(filename);
+              resolve(result);
             } catch (error) {
               console.error('Error processing voice input:', error);
               setIsProcessing(false);
@@ -67,7 +76,7 @@ export const useVoiceNaming = ({ t, webhookUrl }: UseVoiceNamingProps) => {
     });
   }, [microphone, webhookService, webhookUrl]);
 
-  const stopListeningForName = useCallback(async (): Promise<string> => {
+  const stopListeningForName = useCallback(async (): Promise<VoiceNamingResult> => {
     try {
       if (!microphone.isRecording) {
         throw new Error('Not currently recording');
@@ -90,12 +99,12 @@ export const useVoiceNaming = ({ t, webhookUrl }: UseVoiceNamingProps) => {
         transcription = response;
       }
       
-      // Convert transcription to filename
-      const filename = convertToFilename(transcription);
-      console.log('Transcription:', transcription, 'Filename:', filename);
+      // Parse transcription to extract filename and metadata
+      const result = parseVoiceInput(transcription);
+      console.log('Transcription:', transcription, 'Parsed result:', result);
       
       setIsProcessing(false);
-      return filename;
+      return result;
     } catch (error) {
       console.error('Error processing voice input:', error);
       setIsProcessing(false);
@@ -112,9 +121,14 @@ export const useVoiceNaming = ({ t, webhookUrl }: UseVoiceNamingProps) => {
   };
 };
 
-// Helper function to convert Estonian transcription to filename
-const convertToFilename = (transcription: string): string => {
-  if (!transcription) return 'photo';
+// Enhanced function to parse Estonian voice input and extract metadata
+const parseVoiceInput = (transcription: string): VoiceNamingResult => {
+  if (!transcription) {
+    return {
+      filename: 'photo',
+      metadata: {}
+    };
+  }
   
   // Estonian number words to digits mapping
   const numberWords: { [key: string]: string } = {
@@ -149,24 +163,61 @@ const convertToFilename = (transcription: string): string => {
     'sada': '100'
   };
   
-  let result = transcription.toLowerCase().trim();
+  let text = transcription.toLowerCase().trim();
+  const originalText = text;
   
-  // Replace Estonian number words with digits
+  // Extract metadata patterns
+  const metadata: VoiceNamingResult['metadata'] = {};
+  
+  // Look for unit/apartment information (korter X, maja X, etc.)
+  const unitMatch = text.match(/\b(korter|maja|büüroo|pood)\s+(\w+)/);
+  if (unitMatch) {
+    let unitNumber = unitMatch[2];
+    // Convert number words to digits for unit number
+    Object.entries(numberWords).forEach(([word, digit]) => {
+      unitNumber = unitNumber.replace(new RegExp(`\\b${word}\\b`, 'g'), digit);
+    });
+    metadata.unit = `${unitMatch[1]} ${unitNumber}`;
+  }
+  
+  // Extract location/room type from the beginning
+  const locationWords = ['vannituba', 'elutuba', 'magamistuba', 'köök', 'koridor', 'rõdu', 'keldri', 'pööning'];
+  let location = '';
+  for (const word of locationWords) {
+    if (text.includes(word)) {
+      location = word;
+      break;
+    }
+  }
+  
+  if (location) {
+    metadata.location = location;
+    metadata.description = originalText;
+  }
+  
+  // Generate filename from the first part (usually the room/location)
+  let filename = location || 'photo';
+  
+  // Add numbers from the text to filename
+  let processedText = text;
   Object.entries(numberWords).forEach(([word, digit]) => {
-    result = result.replace(new RegExp(`\\b${word}\\b`, 'g'), digit);
+    processedText = processedText.replace(new RegExp(`\\b${word}\\b`, 'g'), digit);
   });
   
-  // Handle compound numbers like "kakskümmend neli" -> "24"
-  result = result.replace(/(\d+)\s+(\d+)/g, '$1$2');
+  // Extract numbers and append to filename
+  const numbers = processedText.match(/\d+/g);
+  if (numbers) {
+    filename += numbers.join('');
+  }
   
-  // Remove special characters except letters, numbers, and spaces
-  result = result.replace(/[^a-zA-ZäöüõÄÖÜÕ0-9\s]/g, '');
-  
-  // Replace spaces with nothing or underscore
-  result = result.replace(/\s+/g, '');
+  // Clean filename
+  filename = filename.replace(/[^a-zA-ZäöüõÄÖÜÕ0-9]/g, '');
   
   // Ensure it's not empty
-  if (!result) result = 'photo';
+  if (!filename) filename = 'photo';
   
-  return result;
+  return {
+    filename,
+    metadata
+  };
 };

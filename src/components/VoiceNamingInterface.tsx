@@ -37,22 +37,27 @@ export const VoiceNamingInterface: React.FC<VoiceNamingInterfaceProps> = ({
         Anna fotole nimi häälkäsklusega
       </p>
       
-      <div className="flex items-center space-x-3">
-        <Button
-          onClick={isListening ? onStopListening : onStartListening}
-          className={cn(
-            'w-16 h-16 rounded-full transition-all duration-200',
-            isListening 
-              ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
-              : 'bg-orange-600 hover:bg-orange-700'
-          )}
-        >
-          {isListening ? (
-            <MicOff className="w-6 h-6 text-white" />
-          ) : (
-            <Mic className="w-6 h-6 text-white" />
-          )}
-        </Button>
+      <div className="flex flex-col items-center space-y-3">
+        {/* Large circular microphone button matching the screenshot */}
+        <div className="relative">
+          <Button
+            onClick={isListening ? onStopListening : onStartListening}
+            className={cn(
+              'w-24 h-24 rounded-full transition-all duration-200 relative',
+              'bg-gray-400 hover:bg-gray-500 border-4 border-white shadow-lg',
+              isListening && 'animate-pulse bg-red-500 hover:bg-red-600'
+            )}
+          >
+            {/* White circle background for mic */}
+            <div className="absolute inset-3 bg-white rounded-full flex items-center justify-center">
+              {isListening ? (
+                <div className="w-6 h-6 bg-black rounded-full" />
+              ) : (
+                <Mic className="w-8 h-8 text-black" />
+              )}
+            </div>
+          </Button>
+        </div>
         
         <Button
           onClick={onSkip}
@@ -65,13 +70,13 @@ export const VoiceNamingInterface: React.FC<VoiceNamingInterfaceProps> = ({
       
       <p className="text-xs text-amber-600 text-center">
         {isListening 
-          ? "Kuulan... Vajuta punast nuppu lõpetamiseks" 
+          ? "Kuulan... Vajuta nuppu lõpetamiseks" 
           : "Vajuta mikrofoni, et anda failile nimi"
         }
       </p>
       
       <p className="text-xs text-gray-500 text-center">
-        Näide: "elutuba kakskümmend neli" → elutuba24.jpg
+        Näide: "vannituba korter kakskümmend neli" → vannituba24.jpg + metaandmed
       </p>
     </div>
   );
