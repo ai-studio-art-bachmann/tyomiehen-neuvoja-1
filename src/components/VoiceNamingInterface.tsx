@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff } from 'lucide-react';
+import { Mic } from 'lucide-react';
 import { Translations } from '@/translations/types';
 import { cn } from '@/lib/utils';
 
@@ -38,31 +38,35 @@ export const VoiceNamingInterface: React.FC<VoiceNamingInterfaceProps> = ({
       </p>
       
       <div className="flex flex-col items-center space-y-3">
-        {/* Large circular microphone button matching the screenshot */}
+        {/* Large circular microphone button matching the screenshot exactly */}
         <div className="relative">
           <Button
             onClick={isListening ? onStopListening : onStartListening}
             className={cn(
-              'w-24 h-24 rounded-full transition-all duration-200 relative',
-              'bg-gray-400 hover:bg-gray-500 border-4 border-white shadow-lg',
+              'w-32 h-32 rounded-full p-0 border-0 shadow-lg transition-all duration-200',
+              'bg-gray-400 hover:bg-gray-500',
               isListening && 'animate-pulse bg-red-500 hover:bg-red-600'
             )}
           >
-            {/* White circle background for mic */}
-            <div className="absolute inset-3 bg-white rounded-full flex items-center justify-center">
+            {/* White circle background for mic - exactly like in screenshot */}
+            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center">
               {isListening ? (
-                <div className="w-6 h-6 bg-black rounded-full" />
+                <div className="w-8 h-8 bg-black rounded-full" />
               ) : (
-                <Mic className="w-8 h-8 text-black" />
+                <Mic className="w-12 h-12 text-black" strokeWidth={2} />
               )}
             </div>
           </Button>
         </div>
         
+        <p className="text-sm text-center font-medium text-gray-700">
+          Alusta keskustelu
+        </p>
+        
         <Button
           onClick={onSkip}
           variant="outline"
-          className="text-gray-600 hover:text-gray-800"
+          className="text-gray-600 hover:text-gray-800 mt-2"
         >
           Jäta vahele
         </Button>
