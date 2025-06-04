@@ -7,14 +7,14 @@ interface UsePhotoUploadProps {
   webhookUrl: string;
   photoTaken: string | null;
   t: Translations;
-  onUploadSuccess: () => void; // Callback to reset photoTaken in parent
+  onUploadSuccess: () => void;
 }
 
 export const usePhotoUpload = ({ webhookUrl, photoTaken, t, onUploadSuccess }: UsePhotoUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  const uploadPhoto = useCallback(async () => {
+  const uploadPhoto = useCallback(async (customFilename?: string) => {
     if (!photoTaken) return;
     
     setIsUploading(true);
@@ -23,7 +23,10 @@ export const usePhotoUpload = ({ webhookUrl, photoTaken, t, onUploadSuccess }: U
     try {
       const response = await fetch(photoTaken);
       const blob = await response.blob();
-      const filename = `photo_${new Date().toISOString().replace(/:/g, '-')}.jpg`;
+      
+      // Use custom filename if provided, otherwise use timestamp
+      const baseFilename = customFilename || `photo_${new Date().toISOString().replace(/:/g, '-')}`;
+      const filename = `${baseFilename}.jpg`;
       
       const formData = new FormData();
       formData.append('file', blob, filename);
@@ -55,10 +58,10 @@ export const usePhotoUpload = ({ webhookUrl, photoTaken, t, onUploadSuccess }: U
       
       toast({
         title: t.photoUploaded || "Photo uploaded",
-        description: t.photoUploadedSuccess || "Photo was uploaded successfully",
+        description: `${t.photoUploadedSuccess || "Photo was uploaded successfully"} (${filename})`,
       });
       
-      onUploadSuccess(); // Call callback to reset photoTaken
+      onUploadSuccess();
       
     } catch (error) {
       console.error('Photo upload error:', error);

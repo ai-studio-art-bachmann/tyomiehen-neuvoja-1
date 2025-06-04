@@ -2,30 +2,57 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Translations } from '@/translations/types';
+import { VoiceNamingInterface } from './VoiceNamingInterface';
 
 interface CameraControlsProps {
   isCameraOn: boolean;
   photoTaken: string | null;
+  isWaitingForName: boolean;
   isUploading: boolean;
+  isListening: boolean;
+  isProcessing: boolean;
   onStartCamera: () => void;
   onStopCamera: () => void;
   onTakePhoto: () => void;
-  onUploadPhoto: () => void;
+  onUploadPhoto: (filename?: string) => void;
   onResetPhoto: () => void;
+  onStartListening: () => void;
+  onStopListening: () => void;
+  onSkipNaming: () => void;
   t: Translations;
 }
 
 export const CameraControls: React.FC<CameraControlsProps> = ({
   isCameraOn,
   photoTaken,
+  isWaitingForName,
   isUploading,
+  isListening,
+  isProcessing,
   onStartCamera,
   onStopCamera,
   onTakePhoto,
   onUploadPhoto,
   onResetPhoto,
+  onStartListening,
+  onStopListening,
+  onSkipNaming,
   t,
 }) => {
+  // Show voice naming interface when waiting for name
+  if (isWaitingForName) {
+    return (
+      <VoiceNamingInterface
+        isListening={isListening}
+        isProcessing={isProcessing}
+        onStartListening={onStartListening}
+        onStopListening={onStopListening}
+        onSkip={onSkipNaming}
+        t={t}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-wrap gap-2 justify-center">
       {!isCameraOn && !photoTaken && (
@@ -45,10 +72,10 @@ export const CameraControls: React.FC<CameraControlsProps> = ({
         </>
       )}
       
-      {photoTaken && (
+      {photoTaken && !isWaitingForName && (
         <>
           <Button 
-            onClick={onUploadPhoto} 
+            onClick={() => onUploadPhoto()} 
             disabled={isUploading}
             className="bg-orange-600 hover:bg-orange-700"
           >

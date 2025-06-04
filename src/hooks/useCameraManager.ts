@@ -1,10 +1,10 @@
 
 import { useRef, useState, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { Translations } from '@/translations/types'; // Assuming Translations type is exported
+import { Translations } from '@/translations/types';
 
 interface UseCameraManagerProps {
-  t: Translations; // Use the actual Translations type
+  t: Translations;
 }
 
 export const useCameraManager = ({ t }: UseCameraManagerProps) => {
@@ -13,6 +13,7 @@ export const useCameraManager = ({ t }: UseCameraManagerProps) => {
   const streamRef = useRef<MediaStream | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [photoTaken, setPhotoTaken] = useState<string | null>(null);
+  const [isWaitingForName, setIsWaitingForName] = useState(false);
 
   const startCamera = useCallback(async () => {
     try {
@@ -26,7 +27,8 @@ export const useCameraManager = ({ t }: UseCameraManagerProps) => {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         setIsCameraOn(true);
-        setPhotoTaken(null); // Reset photo if camera is restarted
+        setPhotoTaken(null);
+        setIsWaitingForName(false);
       }
     } catch (err) {
       console.error("Error accessing the camera:", err);
@@ -49,6 +51,7 @@ export const useCameraManager = ({ t }: UseCameraManagerProps) => {
       videoRef.current.srcObject = null;
     }
     setIsCameraOn(false);
+    setIsWaitingForName(false);
   }, []);
 
   const takePhoto = useCallback(() => {
@@ -64,18 +67,18 @@ export const useCameraManager = ({ t }: UseCameraManagerProps) => {
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL('image/jpeg');
         setPhotoTaken(dataUrl);
-        stopCamera(); // Stop camera after taking photo, can be adjusted
+        setIsWaitingForName(true); // Now waiting for voice name
+        stopCamera();
       }
     }
   }, [isCameraOn, stopCamera]);
 
   const resetPhoto = useCallback(() => {
     setPhotoTaken(null);
-    // Optionally, restart camera automatically if needed
-    // startCamera(); 
+    setIsWaitingForName(false);
   }, []);
   
-  // Ensure camera is stopped when component unmounts or hook is no longer used
+  // Cleanup on unmount
   useState(() => {
     return () => {
       if (streamRef.current) {
@@ -84,16 +87,17 @@ export const useCameraManager = ({ t }: UseCameraManagerProps) => {
     };
   });
 
-
   return {
     videoRef,
     canvasRef,
     isCameraOn,
     photoTaken,
+    isWaitingForName,
     startCamera,
     stopCamera,
     takePhoto,
     resetPhoto,
-    setPhotoTaken // Expose setPhotoTaken if needed externally
+    setPhotoTaken,
+    setIsWaitingForName
   };
 };
