@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { getTranslations } from '@/translations';
@@ -55,7 +54,7 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
 
   const { playAudioResponse, isPlaying } = useAudioResponse();
 
-  // Automaattinen äänikysely kuvan ottamisen jälkeen
+  // Automaattinen äänikysely kuva võtmise järel
   useEffect(() => {
     if (photoTaken && isWaitingForName && !isAsking) {
       askForFilename();
@@ -65,13 +64,13 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
   const askForFilename = async () => {
     setIsAsking(true);
     try {
-      // Luo äänikysymys puhesynteesillä
-      const utterance = new SpeechSynthesisUtterance("Mikä nimi tälle tiedostolle annetaan?");
-      utterance.lang = 'fi-FI';
+      // Loo äänikysymys puhesynteesillä
+      const utterance = new SpeechSynthesisUtterance("Anna failile nimi häälega");
+      utterance.lang = 'et-EE';
       utterance.rate = 0.9;
       utterance.pitch = 1;
       
-      // Odota että ääni on toistettu loppuun
+      // Oota, et ääni on esitatud lõpuni
       await new Promise((resolve) => {
         utterance.onend = resolve;
         speechSynthesis.speak(utterance);
@@ -85,8 +84,9 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
 
   const handleStartListening = async () => {
     try {
+      console.log('Alustan häälnimetunnistust...');
       const result = await startListeningForName();
-      console.log('Saaatiin ääninimetunnistus:', result);
+      console.log('Saatiin ääninimetunnistus:', result);
       
       setIsAnalyzing(true);
       
@@ -102,8 +102,8 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
       setIsAnalyzing(false);
       
       toast({
-        title: "Analyysi valmis",
-        description: `Kuva analysoitu: ${result.filename}.jpg`,
+        title: "Analüüs valmis",
+        description: `Pilt analüüsitud: ${result.filename}.jpg`,
       });
     } catch (error) {
       console.error('Ääninimetunnistus epäonnistui:', error);
@@ -111,8 +111,8 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
       
       // Äänipalautetta virheestä
       try {
-        const errorUtterance = new SpeechSynthesisUtterance("Yritetään uudelleen");
-        errorUtterance.lang = 'fi-FI';
+        const errorUtterance = new SpeechSynthesisUtterance("Proovi uuesti");
+        errorUtterance.lang = 'et-EE';
         speechSynthesis.speak(errorUtterance);
       } catch (e) {
         console.error('Äänivirheilmoitus epäonnistui:', e);
@@ -128,8 +128,9 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
 
   const handleStopListening = async () => {
     try {
+      console.log('Lopetan häälnimetunnistuse...');
       const result = await stopListeningForName();
-      console.log('Saaatiin ääninimetunnistus:', result);
+      console.log('Saatiin ääninimetunnistus:', result);
       
       setIsAnalyzing(true);
       
@@ -145,8 +146,8 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
       setIsAnalyzing(false);
       
       toast({
-        title: "Analyysi valmis",
-        description: `Kuva analysoitu: ${result.filename}.jpg`,
+        title: "Analüüs valmis",
+        description: `Pilt analüüsitud: ${result.filename}.jpg`,
       });
     } catch (error) {
       console.error('Ääninimetunnistus epäonnistui:', error);
@@ -154,8 +155,8 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
       
       // Äänipalautetta virheestä
       try {
-        const errorUtterance = new SpeechSynthesisUtterance("Yritetään uudelleen");
-        errorUtterance.lang = 'fi-FI';
+        const errorUtterance = new SpeechSynthesisUtterance("Proovi uuesti");
+        errorUtterance.lang = 'et-EE';
         speechSynthesis.speak(errorUtterance);
       } catch (e) {
         console.error('Äänivirheilmoitus epäonnistui:', e);
@@ -173,6 +174,7 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
     if (!photoTaken) return null;
     
     try {
+      console.log('Laen üles pildi analüüsiks:', filename, metadata);
       const response = await fetch(photoTaken);
       const blob = await response.blob();
       
@@ -193,20 +195,21 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
       });
       
       if (!uploadResponse.ok) {
-        throw new Error(`Palvelin vastasi virheellä: ${uploadResponse.status}`);
+        throw new Error(`Server vastas veaga: ${uploadResponse.status}`);
       }
       
       const data = await uploadResponse.json();
-      console.log('Analyysi vastaus:', data);
+      console.log('Analüüsi vastus:', data);
       
       return data;
     } catch (error) {
-      console.error('Kuva-analyysi epäonnistui:', error);
+      console.error('Pildi analüüs ebaõnnestus:', error);
       throw error;
     }
   };
 
   const handleSkipNaming = () => {
+    console.log('Jätan häälnimetamise vahele...');
     setIsWaitingForName(false);
     // Lähetä oletusarvoisella nimellä
     uploadPhoto();
@@ -239,9 +242,9 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
         <div className="flex flex-col items-center space-y-2 p-4 bg-blue-50 rounded-lg">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           <p className="text-sm text-blue-700">
-            {isAsking && "Kysyn tiedoston nimeä..."}
-            {isAnalyzing && "Analysoin kuvaa..."}
-            {isPlaying && "Toistetaan vastausta..."}
+            {isAsking && "Küsin faili nime..."}
+            {isAnalyzing && "Analüüsin pilti..."}
+            {isPlaying && "Esitan vastust..."}
           </p>
         </div>
       )}
@@ -253,6 +256,7 @@ export const Camera: React.FC<CameraProps> = ({ webhookUrl, language }) => {
         isUploading={isUploading}
         isListening={isListening}
         isProcessing={isProcessing}
+        isAsking={isAsking}
         onStartCamera={startCamera}
         onStopCamera={stopCamera}
         onTakePhoto={takePhoto}

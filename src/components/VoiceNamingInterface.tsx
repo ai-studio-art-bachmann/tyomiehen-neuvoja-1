@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Mic } from 'lucide-react';
 import { Translations } from '@/translations/types';
 import { cn } from '@/lib/utils';
 
@@ -49,22 +48,30 @@ export const VoiceNamingInterface: React.FC<VoiceNamingInterfaceProps> = ({
       </p>
       
       <div className="flex flex-col items-center space-y-3">
-        {/* Large circular microphone button matching the screenshot exactly */}
+        {/* Mikrofoni nupp - täpselt nagu kuvatõmmisel */}
         <div className="relative">
           <Button
             onClick={isListening ? onStopListening : onStartListening}
             className={cn(
               'w-32 h-32 rounded-full p-0 border-0 shadow-lg transition-all duration-200',
-              'bg-gray-400 hover:bg-gray-500',
-              isListening && 'animate-pulse bg-red-500 hover:bg-red-600'
+              'bg-gray-400 hover:bg-gray-500 focus:outline-none focus:ring-4 focus:ring-gray-300',
+              isListening && 'animate-pulse bg-red-500 hover:bg-red-600 focus:ring-red-300'
             )}
           >
-            {/* White circle background for mic - exactly like in screenshot */}
-            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center">
+            {/* Suur valge ring mikrofoni jaoks */}
+            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center relative">
               {isListening ? (
-                <div className="w-8 h-8 bg-black rounded-full" />
+                /* Must punkt salvestamise ajal */
+                <div className="w-6 h-6 bg-black rounded-full" />
               ) : (
-                <Mic className="w-12 h-12 text-black" strokeWidth={2} />
+                /* Mikrofoni ikoon vaikimisi olekus */
+                <svg 
+                  className="w-10 h-10 text-black" 
+                  fill="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 2c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2s-2-.9-2-2V4c0-1.1.9-2 2-2zm0 16c2.76 0 5-2.24 5-5v-1h2v1c0 4.28-3.72 7.64-8 7.98V23h-2v-2.02C4.72 20.64 1 17.28 1 13v-1h2v1c0 2.76 2.24 5 5 5z"/>
+                </svg>
               )}
             </div>
           </Button>
