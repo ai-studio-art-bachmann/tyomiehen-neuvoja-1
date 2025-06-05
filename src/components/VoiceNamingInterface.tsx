@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Translations } from '@/translations/types';
 import { cn } from '@/lib/utils';
+import { Mic } from 'lucide-react';
 
 interface VoiceNamingInterfaceProps {
   isListening: boolean;
@@ -56,16 +58,14 @@ export const VoiceNamingInterface: React.FC<VoiceNamingInterfaceProps> = ({
               isListening && 'animate-pulse bg-red-500 hover:bg-red-600 focus:ring-red-300'
             )}
           >
-            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center relative">
-              {isListening ? (
-                <div className="w-6 h-6 bg-black rounded-full" />
-              ) : (
-                <div className="relative">
-                  <div className="w-8 h-6 bg-black rounded-t-full"></div>
-                  <div className="w-1 h-3 bg-black mx-auto"></div>
-                  <div className="w-6 h-1 bg-black mx-auto"></div>
-                </div>
-              )}
+            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center">
+              <Mic 
+                size={32} 
+                className={cn(
+                  'text-gray-700',
+                  isListening && 'text-red-600'
+                )}
+              />
             </div>
           </Button>
         </div>
