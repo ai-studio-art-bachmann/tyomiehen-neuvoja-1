@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Translations } from '@/translations/types';
 import { cn } from '@/lib/utils';
+import { Mic } from 'lucide-react';
 
 interface VoiceNamingInterfaceProps {
   isListening: boolean;
@@ -64,21 +65,15 @@ export const VoiceNamingInterface: React.FC<VoiceNamingInterfaceProps> = ({
                 /* Must punkt salvestamise ajal */
                 <div className="w-6 h-6 bg-black rounded-full" />
               ) : (
-                /* Mikrofoni ikoon vaikimisi olekus */
-                <svg 
-                  className="w-10 h-10 text-black" 
-                  fill="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 2c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2s-2-.9-2-2V4c0-1.1.9-2 2-2zm0 16c2.76 0 5-2.24 5-5v-1h2v1c0 4.28-3.72 7.64-8 7.98V23h-2v-2.02C4.72 20.64 1 17.28 1 13v-1h2v1c0 2.76 2.24 5 5 5z"/>
-                </svg>
+                /* Mikrofoni ikoon vaikimisi olekus - kasutame Lucide ikooni */
+                <Mic className="w-8 h-8 text-gray-600" />
               )}
             </div>
           </Button>
         </div>
         
         <p className="text-sm text-center font-medium text-gray-700">
-          Alusta keskustelu
+          Aloita keskustelu
         </p>
         
         <Button
