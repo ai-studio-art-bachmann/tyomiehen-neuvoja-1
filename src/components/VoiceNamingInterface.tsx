@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 interface VoiceNamingInterfaceProps {
   isListening: boolean;
   isProcessing: boolean;
+  isAsking?: boolean;
   onStartListening: () => void;
   onStopListening: () => void;
   onSkip: () => void;
@@ -17,11 +18,21 @@ interface VoiceNamingInterfaceProps {
 export const VoiceNamingInterface: React.FC<VoiceNamingInterfaceProps> = ({
   isListening,
   isProcessing,
+  isAsking = false,
   onStartListening,
   onStopListening,
   onSkip,
   t
 }) => {
+  if (isAsking) {
+    return (
+      <div className="flex flex-col items-center space-y-4 p-4 bg-green-50 rounded-lg">
+        <div className="animate-pulse rounded-full h-8 w-8 bg-green-600"></div>
+        <p className="text-sm text-green-700">Kysyn tiedoston nimeä...</p>
+      </div>
+    );
+  }
+
   if (isProcessing) {
     return (
       <div className="flex flex-col items-center space-y-4 p-4 bg-blue-50 rounded-lg">

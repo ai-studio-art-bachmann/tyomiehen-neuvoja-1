@@ -11,6 +11,7 @@ interface CameraControlsProps {
   isUploading: boolean;
   isListening: boolean;
   isProcessing: boolean;
+  isAsking?: boolean;
   onStartCamera: () => void;
   onStopCamera: () => void;
   onTakePhoto: () => void;
@@ -29,6 +30,7 @@ export const CameraControls: React.FC<CameraControlsProps> = ({
   isUploading,
   isListening,
   isProcessing,
+  isAsking = false,
   onStartCamera,
   onStopCamera,
   onTakePhoto,
@@ -45,6 +47,7 @@ export const CameraControls: React.FC<CameraControlsProps> = ({
       <VoiceNamingInterface
         isListening={isListening}
         isProcessing={isProcessing}
+        isAsking={isAsking}
         onStartListening={onStartListening}
         onStopListening={onStopListening}
         onSkip={onSkipNaming}
