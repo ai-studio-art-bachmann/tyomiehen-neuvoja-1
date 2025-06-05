@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Translations } from '@/translations/types';
@@ -48,7 +47,6 @@ export const VoiceNamingInterface: React.FC<VoiceNamingInterfaceProps> = ({
       </p>
       
       <div className="flex flex-col items-center space-y-3">
-        {/* Mikrofoni nupp - täpselt nagu kuvatõmmisel */}
         <div className="relative">
           <Button
             onClick={isListening ? onStopListening : onStartListening}
@@ -58,19 +56,13 @@ export const VoiceNamingInterface: React.FC<VoiceNamingInterfaceProps> = ({
               isListening && 'animate-pulse bg-red-500 hover:bg-red-600 focus:ring-red-300'
             )}
           >
-            {/* Suur valge ring mikrofoni jaoks */}
             <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center relative">
               {isListening ? (
-                /* Must punkt salvestamise ajal */
                 <div className="w-6 h-6 bg-black rounded-full" />
               ) : (
-                /* Mikrofoni kujund täpselt nagu kuvatõmmisel */
                 <div className="relative">
-                  {/* Mikrofoni ülemine osa - must poolring */}
                   <div className="w-8 h-6 bg-black rounded-t-full"></div>
-                  {/* Mikrofoni jalg */}
                   <div className="w-1 h-3 bg-black mx-auto"></div>
-                  {/* Mikrofoni alus */}
                   <div className="w-6 h-1 bg-black mx-auto"></div>
                 </div>
               )}
