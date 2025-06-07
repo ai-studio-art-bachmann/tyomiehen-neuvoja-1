@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useCameraVoiceFlow } from '@/hooks/useCameraVoiceFlow';
@@ -41,9 +40,10 @@ export const CameraVoiceFlow: React.FC<CameraVoiceFlowProps> = ({ webhookUrl }) 
         return (
           <Button
             onClick={flow.startFlow}
-            className="w-full h-20 rounded-full shadow-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-lg font-semibold"
+            size="lg"
+            className="w-full"
           >
-            <Camera className="mr-2" size={24} />
+            <Camera className="mr-2" />
             Aloita kuvanotto
           </Button>
         );
@@ -52,19 +52,18 @@ export const CameraVoiceFlow: React.FC<CameraVoiceFlowProps> = ({ webhookUrl }) 
         return (
           <Button
             onClick={flow.capturePhoto}
-            className="w-full h-20 rounded-full shadow-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-lg font-semibold"
+            size="lg"
+            className="w-full"
           >
-            <Camera className="mr-2" size={24} />
+            <Camera className="mr-2" />
             Ota kuva
           </Button>
         );
       
       case 'captured':
         return (
-          <div className="w-full h-20 rounded-full shadow-lg bg-gradient-to-r from-yellow-500 to-yellow-600 flex items-center justify-center">
-            <div className="animate-pulse text-white font-semibold">
-              Valmistaudun ääniohjauksen...
-            </div>
+          <div className="w-full h-12 flex items-center justify-center rounded-md bg-muted text-muted-foreground">
+            <p>Valmistaudun ääniohjaukseen...</p>
           </div>
         );
       
@@ -72,31 +71,28 @@ export const CameraVoiceFlow: React.FC<CameraVoiceFlowProps> = ({ webhookUrl }) 
       case 'listening':
       case 'asking-choice':
         return (
-          <div className="w-full h-20 rounded-full shadow-lg bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center">
-            <div className={cn(
-              "w-16 h-16 bg-white rounded-full flex items-center justify-center",
-              "animate-pulse"
-            )}>
-              <Mic size={32} className="text-orange-600" />
+          <div className="w-full h-12 flex items-center justify-center rounded-md bg-muted">
+            <div className="flex items-center text-muted-foreground">
+                <Mic size={20} className="mr-2 animate-pulse text-primary" />
+                <p>Kuuntelen...</p>
             </div>
           </div>
         );
       
       case 'processing':
         return (
-          <div className="w-full h-20 rounded-full shadow-lg bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mr-3"></div>
-            <span className="text-white font-semibold">Käsittelen...</span>
-          </div>
+            <Button disabled className="w-full" size="lg">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current mr-3"></div>
+                Käsittelen...
+            </Button>
         );
       
       case 'playing':
         return (
-          <div className="w-full h-20 rounded-full shadow-lg bg-gradient-to-r from-indigo-500 to-indigo-600 flex items-center justify-center">
-            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center animate-pulse">
-              <Volume2 size={32} className="text-indigo-600" />
-            </div>
-          </div>
+            <Button disabled className="w-full" size="lg">
+                <Volume2 size={20} className="mr-2 animate-pulse" />
+                Toistetaan analyysiä...
+            </Button>
         );
       
       default:
@@ -158,7 +154,7 @@ export const CameraVoiceFlow: React.FC<CameraVoiceFlowProps> = ({ webhookUrl }) 
         <Button
           onClick={flow.resetFlow}
           variant="outline"
-          className="w-full max-w-md border-gray-300 text-gray-600 hover:bg-gray-50"
+          className="w-full max-w-md"
         >
           <RotateCcw className="mr-2" size={16} />
           Aloita alusta
