@@ -19,6 +19,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Työkalu App" />
 
+    <!-- Permissions Policy - only include features we actually use -->
+    <meta http-equiv="Permissions-Policy" content="camera=*, microphone=*, geolocation=()">
+
     <!-- Preconnect to improve performance -->
     <link rel="preconnect" href="https://api.openai.com" />
     <link rel="preconnect" href="https://n8n.yourdomain.com" />

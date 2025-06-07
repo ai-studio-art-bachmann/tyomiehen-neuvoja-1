@@ -1,5 +1,5 @@
 
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 
 export const useCamera = () => {
@@ -77,14 +77,14 @@ export const useCamera = () => {
     setIsOpen(false);
   }, []);
 
-  // Cleanup on unmount
-  useState(() => {
+  // Cleanup on unmount - fix: use useEffect instead of useState
+  useEffect(() => {
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
       }
     };
-  });
+  }, []);
 
   return {
     videoRef,

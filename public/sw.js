@@ -1,11 +1,11 @@
 
-const CACHE_NAME = 'tyokalu-app-v2';  // Updated version
+const CACHE_NAME = 'tyokalu-app-v2';
 const STATIC_CACHE_URLS = [
   '/',
   '/index.html',
   '/manifest.json',
   '/female-greeting.mp3',
-  '/lovable-uploads/10bcea1a-822b-41ed-835a-637ece170831.png'  // New logo image
+  '/lovable-uploads/10bcea1a-822b-41ed-835a-637ece170831.png'
 ];
 
 // Install event - cache static resources
@@ -20,6 +20,9 @@ self.addEventListener('install', (event) => {
       .then(() => {
         console.log('Static resources cached');
         return self.skipWaiting();
+      })
+      .catch((error) => {
+        console.error('Installation failed:', error);
       })
   );
 });
@@ -40,6 +43,8 @@ self.addEventListener('activate', (event) => {
     }).then(() => {
       console.log('Service Worker activated');
       return self.clients.claim();
+    }).catch((error) => {
+      console.error('Activation failed:', error);
     })
   );
 });
@@ -51,8 +56,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Skip external requests
-  if (!event.request.url.startsWith(self.location.origin)) {
+  // Skip external requests and chrome-extension requests
+  if (!event.request.url.startsWith(self.location.origin) || 
+      event.request.url.startsWith('chrome-extension://')) {
     return;
   }
 
@@ -82,17 +88,24 @@ self.addEventListener('fetch', (event) => {
               caches.open(CACHE_NAME)
                 .then((cache) => {
                   cache.put(event.request, responseToCache);
+                })
+                .catch((error) => {
+                  console.error('Cache put failed:', error);
                 });
             }
 
             return response;
           })
-          .catch(() => {
+          .catch((error) => {
+            console.error('Fetch failed:', error);
             // Return offline page for navigation requests
             if (event.request.mode === 'navigate') {
               return caches.match('/');
             }
           });
+      })
+      .catch((error) => {
+        console.error('Cache match failed:', error);
       })
   );
 });
@@ -104,15 +117,18 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Background sync for offline uploads
+// Background sync for offline uploads - fix async response issue
 self.addEventListener('sync', (event) => {
+  console.log('Background sync event:', event.tag);
+  
   if (event.tag === 'upload-audio') {
     console.log('Background sync: upload-audio');
     event.waitUntil(
-      // Handle offline audio uploads when connection is restored
       self.registration.showNotification('Työkalu App', {
         body: 'Yhteys palautettu. Voit jatkaa äänikeskustelua.',
-        icon: '/lovable-uploads/10bcea1a-822b-41ed-835a-637ece170831.png'  // Updated icon
+        icon: '/lovable-uploads/10bcea1a-822b-41ed-835a-637ece170831.png'
+      }).catch((error) => {
+        console.error('Notification failed:', error);
       })
     );
   }
@@ -120,10 +136,11 @@ self.addEventListener('sync', (event) => {
   if (event.tag === 'upload-file' || event.tag === 'upload-photo') {
     console.log('Background sync:', event.tag);
     event.waitUntil(
-      // Handle offline file uploads when connection is restored
       self.registration.showNotification('Työkalu App', {
         body: 'Yhteys palautettu. Tiedostot lähetetään.',
         icon: '/lovable-uploads/10bcea1a-822b-41ed-835a-637ece170831.png'
+      }).catch((error) => {
+        console.error('Notification failed:', error);
       })
     );
   }
