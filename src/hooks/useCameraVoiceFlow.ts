@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useCamera } from './useCamera';
 import { useSpeech } from './useSpeech';
@@ -6,10 +5,11 @@ import { useOfflineStorage } from './useOfflineStorage';
 import { toast } from '@/hooks/use-toast';
 
 interface CameraVoiceFlowState {
-  step: 'idle' | 'camera' | 'captured' | 'asking-name' | 'listening' | 'asking-choice' | 'processing' | 'playing';
+  step: 'idle' | 'camera' | 'captured' | 'asking-name' | 'listening' | 'asking-choice' | 'processing' | 'playing' | 'prompt-play';
   photoBlob: Blob | null;
   fileName: string;
   isOnline: boolean;
+  audioUrl: string | null;
 }
 
 export const useCameraVoiceFlow = (webhookUrl: string) => {
@@ -21,7 +21,8 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
     step: 'idle',
     photoBlob: null,
     fileName: '',
-    isOnline: navigator.onLine
+    isOnline: navigator.onLine,
+    audioUrl: null,
   });
 
   const startFlow = useCallback(async () => {
@@ -35,7 +36,7 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
         description: "Tarkista kameran käyttöoikeudet",
         variant: "destructive"
       });
-      setState(prev => ({ ...prev, step: 'idle' }));
+      setState(prev => ({ ...prev, step: 'idle', audioUrl: null }));
     }
   }, [camera]);
 
@@ -114,16 +115,23 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
       
       if (wantAudio && data.audioResponse) {
         setState(prev => ({ ...prev, step: 'playing' }));
-        await playAudioResponse(data.audioResponse);
+        const canPlay = await playAudioResponse(data.audioResponse);
+        if (canPlay) {
+            await speech.speak("Analyysi valmis ja tallennettu");
+            toast({
+                title: "Kuva käsitelty",
+                description: `${fileName}.jpg analysoitu ja tallennettu`
+            });
+            resetFlow();
+        }
+      } else {
+        await speech.speak("Analyysi valmis ja tallennettu");
+        toast({
+            title: "Kuva käsitelty",
+            description: `${fileName}.jpg analysoitu ja tallennettu`
+        });
+        resetFlow();
       }
-
-      await speech.speak("Analyysi valmis ja tallennettu");
-      toast({
-        title: "Kuva käsitelty",
-        description: `${fileName}.jpg analysoitu ja tallennettu`
-      });
-      
-      resetFlow();
     } catch (error) {
       console.error('Photo processing failed:', error);
       await speech.speak("Tallennus epäonnistui. Yritä uudelleen.");
@@ -136,7 +144,7 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
     }
   }, [webhookUrl, offlineStorage, speech]);
 
-  const playAudioResponse = useCallback(async (audioData: string) => {
+  const playAudioResponse = useCallback(async (audioData: string): Promise<boolean> => {
     try {
       // Handle different audio data formats
       let audioUrl = audioData;
@@ -154,31 +162,54 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
       
       const audio = new Audio(audioUrl);
       
-      try {
-        await audio.play();
-        
-        return new Promise<void>((resolve) => {
-          audio.onended = () => resolve();
-          audio.onerror = () => resolve(); // Continue even if audio fails
-        });
-      } catch (autoplayError) {
-        console.warn('Autoplay blocked:', autoplayError);
-        toast({
-          title: "Paina kuunnellaksesi",
-          description: "Analyysi on valmis toistettavaksi"
-        });
+      await audio.play();
+      
+      return new Promise<boolean>((resolve) => {
+        audio.onended = () => resolve(true);
+        audio.onerror = () => resolve(true); // Continue even if audio fails
+      });
+
+    } catch (autoplayError) {
+      console.warn('Autoplay blocked, prompting user:', autoplayError);
+      
+      let audioUrl = audioData;
+      if (!audioData.startsWith('data:') && !audioData.startsWith('blob:')) {
+        audioUrl = `data:audio/mpeg;base64,${audioData}`;
       }
-    } catch (error) {
-      console.error('Audio playback failed:', error);
+
+      setState(prev => ({ ...prev, step: 'prompt-play', audioUrl: audioUrl }));
+      return false; // Indicate that playback was not successful
     }
   }, []);
+  
+  const playAudioFromUrl = useCallback(async () => {
+    if (!state.audioUrl) return;
+    try {
+      setState(prev => ({ ...prev, step: 'playing' }));
+      const audio = new Audio(state.audioUrl);
+      await audio.play();
+
+      audio.onended = () => {
+        toast({
+            title: "Analyysi valmis",
+            description: "Toisto on päättynyt."
+        });
+        resetFlow();
+      };
+    } catch (error) {
+      console.error('Manual audio playback failed:', error);
+      toast({ title: "Toisto epäonnistui", variant: "destructive" });
+      resetFlow();
+    }
+  }, [state.audioUrl]);
 
   const resetFlow = useCallback(() => {
     setState({
       step: 'idle',
       photoBlob: null,
       fileName: '',
-      isOnline: navigator.onLine
+      isOnline: navigator.onLine,
+      audioUrl: null,
     });
     camera.close();
   }, [camera]);
@@ -189,6 +220,7 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
     canvasRef: camera.canvasRef,
     startFlow,
     capturePhoto,
-    resetFlow
+    resetFlow,
+    playAudioFromUrl
   };
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useCameraVoiceFlow } from '@/hooks/useCameraVoiceFlow';
-import { Mic, Camera, RotateCcw, Volume2 } from 'lucide-react';
+import { Mic, Camera, RotateCcw, Volume2, PlayCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CameraVoiceFlowProps {
@@ -29,6 +29,8 @@ export const CameraVoiceFlow: React.FC<CameraVoiceFlowProps> = ({ webhookUrl }) 
         return 'Käsittelen kuvaa...';
       case 'playing':
         return 'Toisin analyysiä...';
+      case 'prompt-play':
+        return 'Analyysi on valmis. Paina nappia kuunnellaksesi.';
       default:
         return 'Aloita ottamalla kuva';
     }
@@ -92,6 +94,14 @@ export const CameraVoiceFlow: React.FC<CameraVoiceFlowProps> = ({ webhookUrl }) 
             <Button disabled className="w-full" size="lg">
                 <Volume2 size={20} className="mr-2 animate-pulse" />
                 Toistetaan analyysiä...
+            </Button>
+        );
+      
+      case 'prompt-play':
+        return (
+            <Button onClick={flow.playAudioFromUrl} className="w-full" size="lg">
+                <PlayCircle size={20} className="mr-2" />
+                Kuuntele analyysi
             </Button>
         );
       
