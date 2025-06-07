@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => ({
         target: "https://n8n.artbachmann.eu",
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, "/webhook/voice-assistant"),
+        rewrite: (path) => path.replace(/^\/api(\/)?/, "/webhook/voice-assistant$1"),
       },
     },
   },
