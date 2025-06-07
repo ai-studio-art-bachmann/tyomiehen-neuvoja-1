@@ -1,6 +1,14 @@
 
 import { useCallback } from 'react';
 
+// Extend Window interface for speech recognition
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
+
 export const useSpeech = () => {
   const speak = useCallback((text: string): Promise<void> => {
     return new Promise((resolve, reject) => {
@@ -35,12 +43,12 @@ export const useSpeech = () => {
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
       
-      recognition.onresult = (event) => {
+      recognition.onresult = (event: any) => {
         const result = event.results[0][0].transcript;
         resolve(result);
       };
       
-      recognition.onerror = (error) => {
+      recognition.onerror = (error: any) => {
         reject(new Error(`Speech recognition error: ${error.error}`));
       };
       
