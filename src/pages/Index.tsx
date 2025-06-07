@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const Index = () => {
   const [config, setConfig] = useState<ConversationConfig>({
     language: 'fi',
-    webhookUrl: 'https://n8n.artbachmann.eu/webhook/voice-assistant'
+    webhookUrl: '/api/'
   });
   const [activeTab, setActiveTab] = useState<string>("voice");
 
