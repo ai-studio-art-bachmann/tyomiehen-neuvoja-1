@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 interface OfflinePhoto {
   id: string;
@@ -12,6 +12,31 @@ interface OfflinePhoto {
 export const useOfflineStorage = () => {
   const [pendingUploads, setPendingUploads] = useState<OfflinePhoto[]>([]);
 
+  // Load pending uploads on mount
+  useEffect(() => {
+    const loadPendingUploads = async () => {
+      try {
+        const stored = localStorage.getItem('offlinePhotos');
+        if (stored) {
+          const photos = JSON.parse(stored);
+          // Convert base64 back to blobs for display
+          const photosWithBlobs = await Promise.all(
+            photos.map(async (photo: any) => {
+              const response = await fetch(photo.blob);
+              const blob = await response.blob();
+              return { ...photo, blob };
+            })
+          );
+          setPendingUploads(photosWithBlobs);
+        }
+      } catch (error) {
+        console.error('Failed to load pending uploads:', error);
+      }
+    };
+    
+    loadPendingUploads();
+  }, []);
+
   const saveOffline = useCallback(async (blob: Blob, fileName: string, wantAudio: boolean) => {
     const photo: OfflinePhoto = {
       id: crypto.randomUUID(),
@@ -21,7 +46,6 @@ export const useOfflineStorage = () => {
       wantAudio
     };
 
-    // Save to IndexedDB (simplified - in real app use idb-keyval)
     try {
       const stored = localStorage.getItem('offlinePhotos');
       const photos = stored ? JSON.parse(stored) : [];
@@ -69,6 +93,7 @@ export const useOfflineStorage = () => {
 
         if (uploadResponse.ok) {
           successful.push(photo.id);
+          console.log('Successfully synced offline photo:', photo.fileName);
         }
       } catch (error) {
         console.error('Sync failed for photo:', photo.id, error);
@@ -81,6 +106,8 @@ export const useOfflineStorage = () => {
       localStorage.setItem('offlinePhotos', JSON.stringify(remaining));
       setPendingUploads(prev => prev.filter(p => !successful.includes(p.id)));
     }
+
+    return successful.length;
   }, []);
 
   return {

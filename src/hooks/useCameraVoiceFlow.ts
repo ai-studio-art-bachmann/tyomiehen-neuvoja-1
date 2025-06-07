@@ -41,30 +41,30 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
 
   const capturePhoto = useCallback(async () => {
     try {
-      const blob = camera.capture();
-      if (!blob) throw new Error('Capture failed');
+      const blob = await camera.capture();
       
       setState(prev => ({ ...prev, step: 'captured', photoBlob: blob }));
       camera.close();
       
-      // Ask for filename
+      // Start the voice interaction after a short delay
       setTimeout(async () => {
         try {
           setState(prev => ({ ...prev, step: 'asking-name' }));
           const fileName = await speech.ask("Anna tiedostolle nimi");
+          
           setState(prev => ({ ...prev, fileName, step: 'asking-choice' }));
           
           // Ask if user wants to hear analysis now
           const choice = await speech.ask("Haluatko kuulla analyysin nyt? Sano kyllä tai ei");
-          const wantAudio = choice.toLowerCase().includes('kyllä') || choice.toLowerCase().includes('joo');
+          const wantAudio = choice.toLowerCase().includes('kyllä') || choice.toLowerCase().includes('joo') || choice.toLowerCase().includes('yes');
           
           await processPhoto(blob, fileName, wantAudio);
         } catch (error) {
           console.error('Voice interaction failed:', error);
-          await speech.speak("Yritetään uudelleen");
-          setState(prev => ({ ...prev, step: 'captured' }));
+          await speech.speak("Äänitunnistus epäonnistui. Jatketaan ilman nimeä.");
+          await processPhoto(blob, `kuva_${Date.now()}`, false);
         }
-      }, 100);
+      }, 500);
     } catch (error) {
       console.error('Photo capture failed:', error);
       toast({
@@ -72,6 +72,7 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
         description: "Yritä uudelleen",
         variant: "destructive"
       });
+      setState(prev => ({ ...prev, step: 'camera' }));
     }
   }, [camera, speech]);
 
@@ -82,7 +83,7 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
       if (!navigator.onLine) {
         // Offline mode - save for later sync
         await offlineStorage.saveOffline(blob, fileName, wantAudio);
-        await speech.speak("Tallennus epäonnistui verkkoyhteydenpuutteen vuoksi. Tiedosto tallennetaan kun yhteys palaa.");
+        await speech.speak("Kuva tallennettu offline-tilassa. Lähetetään kun verkko palaa.");
         toast({
           title: "Tallennettu offline-tilassa",
           description: "Kuva lähetetään kun verkko palaa"
@@ -97,6 +98,8 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
       formData.append('filename', `${fileName}.jpg`);
       formData.append('wantAudio', wantAudio.toString());
 
+      console.log('Uploading photo:', fileName, 'Want audio:', wantAudio);
+
       const response = await fetch(webhookUrl, {
         method: 'POST',
         body: formData,
@@ -107,6 +110,7 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
       }
 
       const data = await response.json();
+      console.log('Server response:', data);
       
       if (wantAudio && data.audioResponse) {
         setState(prev => ({ ...prev, step: 'playing' }));
@@ -122,7 +126,7 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
       resetFlow();
     } catch (error) {
       console.error('Photo processing failed:', error);
-      await speech.speak("Tallennus epäonnistui");
+      await speech.speak("Tallennus epäonnistui. Yritä uudelleen.");
       toast({
         title: "Käsittely epäonnistui",
         description: "Yritä uudelleen",
@@ -134,24 +138,36 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
 
   const playAudioResponse = useCallback(async (audioData: string) => {
     try {
-      // Decode audio response (assuming it's a data URI)
-      const audio = new Audio(audioData);
+      // Handle different audio data formats
+      let audioUrl = audioData;
+      
+      if (audioData.startsWith('data:audio/')) {
+        // Base64 data URI - use directly
+        audioUrl = audioData;
+      } else if (audioData.startsWith('blob:')) {
+        // Blob URL - use directly
+        audioUrl = audioData;
+      } else {
+        // Assume base64 string, convert to data URI
+        audioUrl = `data:audio/mpeg;base64,${audioData}`;
+      }
+      
+      const audio = new Audio(audioUrl);
       
       try {
         await audio.play();
+        
+        return new Promise<void>((resolve) => {
+          audio.onended = () => resolve();
+          audio.onerror = () => resolve(); // Continue even if audio fails
+        });
       } catch (autoplayError) {
-        console.warn('Autoplay blocked, user interaction required');
-        // In a real implementation, show a play button here
+        console.warn('Autoplay blocked:', autoplayError);
         toast({
           title: "Paina kuunnellaksesi",
           description: "Analyysi on valmis toistettavaksi"
         });
       }
-      
-      return new Promise<void>((resolve) => {
-        audio.onended = () => resolve();
-        audio.onerror = () => resolve(); // Continue even if audio fails
-      });
     } catch (error) {
       console.error('Audio playback failed:', error);
     }
