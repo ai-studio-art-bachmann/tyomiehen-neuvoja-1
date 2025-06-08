@@ -5,10 +5,12 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# API proxy rules must appear BEFORE the SPA fallback
 [[redirects]]
-  from = "/*"
-  to   = "/index.html"
+  from = "/api/*"
+  to   = "https://n8n.artbachmann.eu/webhook/voice-assistant/:splat"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/api"
@@ -16,8 +18,8 @@
   status = 200
   force = true
 
+# Single Page Application fallback
 [[redirects]]
-  from = "/api/*"
-  to   = "https://n8n.artbachmann.eu/webhook/voice-assistant/:splat"
+  from = "/*"
+  to   = "/index.html"
   status = 200
-  force = true
