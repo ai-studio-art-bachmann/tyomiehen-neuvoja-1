@@ -28,9 +28,11 @@ export const CameraVoiceFlow: React.FC<CameraVoiceFlowProps> = ({ webhookUrl }) 
       case 'processing':
         return 'Käsittelen kuvaa...';
       case 'playing':
-        return 'Toisin analyysiä...';
+        return 'Toistetaan analyysiä...';
       case 'prompt-play':
         return 'Analyysi on valmis. Paina nappia kuunnellaksesi.';
+      case 'results':
+        return 'Analyysin tulokset:';
       default:
         return 'Aloita ottamalla kuva';
     }
@@ -105,6 +107,9 @@ export const CameraVoiceFlow: React.FC<CameraVoiceFlowProps> = ({ webhookUrl }) 
             </Button>
         );
       
+      case 'results':
+        return null;
+      
       default:
         return null;
     }
@@ -146,7 +151,14 @@ export const CameraVoiceFlow: React.FC<CameraVoiceFlowProps> = ({ webhookUrl }) 
       {/* Status */}
       <div className="text-center max-w-md">
         <p className="text-gray-700 font-medium text-lg">{getStepDescription()}</p>
-        {flow.fileName && (
+        
+        {flow.analysisText && (
+          <div className="mt-4 p-4 bg-gray-50 rounded-lg border text-left">
+            <p className="text-gray-800 whitespace-pre-wrap">{flow.analysisText}</p>
+          </div>
+        )}
+        
+        {flow.fileName && flow.step !== 'results' && !flow.analysisText && (
           <p className="text-sm text-gray-500 mt-1">Tiedosto: {flow.fileName}.jpg</p>
         )}
         {!flow.isOnline && (

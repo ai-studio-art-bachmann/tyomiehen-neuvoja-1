@@ -5,11 +5,12 @@ import { useOfflineStorage } from './useOfflineStorage';
 import { toast } from '@/hooks/use-toast';
 
 interface CameraVoiceFlowState {
-  step: 'idle' | 'camera' | 'captured' | 'asking-name' | 'listening' | 'asking-choice' | 'processing' | 'playing' | 'prompt-play';
+  step: 'idle' | 'camera' | 'captured' | 'processing' | 'playing' | 'prompt-play' | 'results';
   photoBlob: Blob | null;
   fileName: string;
   isOnline: boolean;
   audioUrl: string | null;
+  analysisText: string | null;
 }
 
 export const useCameraVoiceFlow = (webhookUrl: string) => {
@@ -23,6 +24,7 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
     fileName: '',
     isOnline: navigator.onLine,
     audioUrl: null,
+    analysisText: null,
   });
 
   const startFlow = useCallback(async () => {
@@ -36,7 +38,7 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
         description: "Tarkista kameran käyttöoikeudet",
         variant: "destructive"
       });
-      setState(prev => ({ ...prev, step: 'idle', audioUrl: null }));
+      setState(prev => ({ ...prev, step: 'idle', audioUrl: null, analysisText: null }));
     }
   }, [camera]);
 
@@ -44,28 +46,13 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
     try {
       const blob = await camera.capture();
       
-      setState(prev => ({ ...prev, step: 'captured', photoBlob: blob }));
+      setState(prev => ({ ...prev, step: 'captured', photoBlob: blob, analysisText: null }));
       camera.close();
       
-      // Start the voice interaction after a short delay
-      setTimeout(async () => {
-        try {
-          setState(prev => ({ ...prev, step: 'asking-name' }));
-          const fileName = await speech.ask("Anna tiedostolle nimi");
-          
-          setState(prev => ({ ...prev, fileName, step: 'asking-choice' }));
-          
-          // Ask if user wants to hear analysis now
-          const choice = await speech.ask("Haluatko kuulla analyysin nyt? Sano kyllä tai ei");
-          const wantAudio = choice.toLowerCase().includes('kyllä') || choice.toLowerCase().includes('joo') || choice.toLowerCase().includes('yes');
-          
-          await processPhoto(blob, fileName, wantAudio);
-        } catch (error) {
-          console.error('Voice interaction failed:', error);
-          await speech.speak("Äänitunnistus epäonnistui. Jatketaan ilman nimeä.");
-          await processPhoto(blob, `kuva_${Date.now()}`, false);
-        }
-      }, 500);
+      const fileName = `kuva_${Date.now()}`;
+      setState(prev => ({ ...prev, fileName }));
+      await processPhoto(blob, fileName, true);
+
     } catch (error) {
       console.error('Photo capture failed:', error);
       toast({
@@ -75,7 +62,7 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
       });
       setState(prev => ({ ...prev, step: 'camera' }));
     }
-  }, [camera, speech]);
+  }, [camera]);
 
   const processPhoto = useCallback(async (blob: Blob, fileName: string, wantAudio: boolean) => {
     setState(prev => ({ ...prev, step: 'processing' }));
@@ -113,24 +100,11 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
       const data = await response.json();
       console.log('Server response:', data);
       
+      const text = data.textResponse || "Tekstivastetta ei saatu.";
+      setState(prev => ({ ...prev, analysisText: text, step: 'results' }));
+
       if (wantAudio && data.audioResponse) {
-        setState(prev => ({ ...prev, step: 'playing' }));
-        const canPlay = await playAudioResponse(data.audioResponse);
-        if (canPlay) {
-            await speech.speak("Analyysi valmis ja tallennettu");
-            toast({
-                title: "Kuva käsitelty",
-                description: `${fileName}.jpg analysoitu ja tallennettu`
-            });
-            resetFlow();
-        }
-      } else {
-        await speech.speak("Analyysi valmis ja tallennettu");
-        toast({
-            title: "Kuva käsitelty",
-            description: `${fileName}.jpg analysoitu ja tallennettu`
-        });
-        resetFlow();
+        await playAudioResponse(data.audioResponse);
       }
     } catch (error) {
       console.error('Photo processing failed:', error);
@@ -194,7 +168,7 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
             title: "Analyysi valmis",
             description: "Toisto on päättynyt."
         });
-        resetFlow();
+        setState(prev => ({ ...prev, step: 'results' }));
       };
     } catch (error) {
       console.error('Manual audio playback failed:', error);
@@ -210,6 +184,7 @@ export const useCameraVoiceFlow = (webhookUrl: string) => {
       fileName: '',
       isOnline: navigator.onLine,
       audioUrl: null,
+      analysisText: null,
     });
     camera.close();
   }, [camera]);
