@@ -1,4 +1,3 @@
-
 const CACHE_NAME = 'tyokalu-app-v2';
 const STATIC_CACHE_URLS = [
   '/',
@@ -51,6 +50,13 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
+  const requestUrl = new URL(event.request.url);
+
+  // If the request is for our API, bypass the service worker entirely.
+  if (requestUrl.pathname.startsWith('/api')) {
+    return; 
+  }
+
   // Skip non-GET requests
   if (event.request.method !== 'GET') {
     return;
