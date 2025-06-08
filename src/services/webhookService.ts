@@ -21,7 +21,6 @@ export class WebhookService {
         method: 'POST',
         body: formData,
         signal: this.abortController.signal,
-        mode: 'cors',
         headers: {
           'Accept': 'audio/mpeg,application/json,*/*'
         }
